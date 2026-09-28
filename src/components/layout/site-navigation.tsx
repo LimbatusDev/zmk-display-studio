@@ -25,7 +25,7 @@ export function SiteNavigation() {
             <Link
               href={href}
               aria-current={pathname === href ? "page" : undefined}
-              className="inline-flex min-h-10 items-center rounded-sm px-2.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-primary aria-[current=page]:bg-highlight aria-[current=page]:font-medium aria-[current=page]:text-highlight-foreground sm:px-3"
+              className="inline-flex min-h-10 items-center rounded-sm px-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-primary aria-[current=page]:bg-highlight aria-[current=page]:font-medium aria-[current=page]:text-highlight-foreground sm:px-3"
             >
               {label}
             </Link>

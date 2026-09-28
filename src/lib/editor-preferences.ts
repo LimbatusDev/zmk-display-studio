@@ -11,9 +11,10 @@ export const preferencesSchema = z.object({
   inverted: z.boolean(),
   previewMode: z.enum(["physical", "pixels", "framebuffer", "source"]),
   showPixelGrid: z.boolean(),
+  showExportSuccess: z.boolean().default(true),
 });
 
-/** Migrate only the old mode name; all saved values still require validation. */
+/** Migrate the old mode name and default new preferences; validate saved values. */
 export function parsePreferences(raw: string) {
   try {
     const value: unknown = JSON.parse(raw);

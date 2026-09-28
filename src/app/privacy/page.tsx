@@ -51,6 +51,10 @@ export default function PrivacyPage() {
           <li>Processing mode and threshold</li>
           <li>Brightness, contrast, and inversion</li>
           <li>Preview mode and the pixel grid preference</li>
+          <li>
+            Whether to show congratulations and installation steps after
+            downloads
+          </li>
         </ul>
         <p>
           These live under <code>{preferencesKey}</code>. Older version-one
@@ -109,6 +113,12 @@ export default function PrivacyPage() {
             Use the image removal control to clear the current source and crop.
           </li>
           <li>Reload or close the tab to clear the working session.</li>
+          <li>
+            Choose “Don’t show this again” after an export to turn off automatic
+            celebrations for all downloads in this browser. To turn them back
+            on, download a file, select “View installation steps,” and uncheck
+            that option.
+          </li>
           <li>
             Use your browser’s site-data settings to remove saved preferences
             for this site. This clears the current and any older preference

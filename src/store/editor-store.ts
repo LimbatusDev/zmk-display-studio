@@ -33,6 +33,7 @@ interface EditorState extends ProcessingSettings {
   transform: ImageTransform;
   previewMode: PreviewMode;
   showPixelGrid: boolean;
+  showExportSuccess: boolean;
   artworkName: string;
   setSourceImage: (image: SourceImage | null) => void;
   setDisplay: (id: string) => void;
@@ -43,6 +44,7 @@ interface EditorState extends ProcessingSettings {
   resetProcessing: () => void;
   setPreviewMode: (mode: PreviewMode) => void;
   setShowPixelGrid: (show: boolean) => void;
+  setShowExportSuccess: (show: boolean) => void;
   setArtworkName: (name: string) => void;
 }
 
@@ -54,6 +56,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   transform: { scale: 1, offsetX: 0, offsetY: 0 },
   previewMode: "physical",
   showPixelGrid: false,
+  showExportSuccess: true,
   artworkName: "custom_art",
   setSourceImage: (sourceImage) => {
     const state = get();
@@ -114,6 +117,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   resetProcessing: () => set(processingDefaults),
   setPreviewMode: (previewMode) => set({ previewMode }),
   setShowPixelGrid: (showPixelGrid) => set({ showPixelGrid }),
+  setShowExportSuccess: (showExportSuccess) => set({ showExportSuccess }),
   setArtworkName: (artworkName) => set({ artworkName }),
 }));
 

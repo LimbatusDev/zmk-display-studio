@@ -16,6 +16,7 @@ test("legacy device preferences become Physical and keep processing values", () 
   assert.deepEqual(parsePreferences(JSON.stringify(saved)), {
     ...saved,
     previewMode: "physical",
+    showExportSuccess: true,
   });
 });
 
@@ -30,9 +31,38 @@ test("preferences support every preview mode and exclude image/transform data", 
           sourceImage: "private",
         }),
       ),
-      { ...saved, previewMode },
+      { ...saved, previewMode, showExportSuccess: true },
     );
   }
+});
+
+test("export success preference defaults on for older settings and preserves an explicit opt-out", () => {
+  const previous = { ...saved, previewMode: "pixels" };
+  assert.deepEqual(parsePreferences(JSON.stringify(previous)), {
+    ...previous,
+    showExportSuccess: true,
+  });
+  for (const showExportSuccess of [false, true]) {
+    assert.deepEqual(
+      parsePreferences(
+        JSON.stringify({
+          ...previous,
+          showExportSuccess,
+          lastDownload: { symbol: "private_art" },
+        }),
+      ),
+      {
+        ...previous,
+        showExportSuccess,
+      },
+    );
+  }
+  assert.equal(
+    parsePreferences(
+      JSON.stringify({ ...previous, showExportSuccess: "false" }),
+    ),
+    null,
+  );
 });
 
 test("invalid persisted settings are rejected", () => {

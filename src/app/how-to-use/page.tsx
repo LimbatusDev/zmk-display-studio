@@ -165,10 +165,20 @@ export default function HowToUsePage() {
           regardless of the selected package.
         </p>
         <p>
-          Next, follow the <Link href="/export-guide">Export Guide</Link> to
-          integrate the files, rebuild your firmware, and flash the peripheral
-          half. The editor generates assets; it does not build or flash
-          firmware.
+          After a download starts, a congratulations screen shows installation
+          steps for the file or package you downloaded. Select{" "}
+          <strong>Don’t show this again</strong> to turn off automatic
+          celebrations for all downloads in this browser.{" "}
+          <strong>View installation steps</strong>
+          remains available after a download; reopen it and uncheck the option
+          to turn celebrations back on. Copying C code keeps its inline
+          confirmation.
+        </p>
+        <p>
+          For the full instructions, follow the{" "}
+          <Link href="/export-guide">Export Guide</Link> to integrate the files,
+          rebuild your firmware, and flash the peripheral half. The editor
+          generates assets; it does not build or flash firmware.
         </p>
       </ContentSection>
     </ContentPage>
