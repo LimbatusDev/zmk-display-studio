@@ -20,6 +20,20 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Code Quality
+
+Run these commands with pnpm:
+
+| Command             | Description                                                                    |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `pnpm format`       | Format files with Prettier.                                                    |
+| `pnpm format:check` | Check formatting without changing files.                                       |
+| `pnpm lint`         | Run ESLint and apply available automatic fixes.                                |
+| `pnpm lint:check`   | Run ESLint without changing files.                                             |
+| `pnpm typecheck`    | Generate Next.js route types and check TypeScript without emitting JavaScript. |
+
+Both lint commands fail on warnings as well as errors.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

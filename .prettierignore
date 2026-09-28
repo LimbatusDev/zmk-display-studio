@@ -1,0 +1,3 @@
+# Prettier also respects .gitignore.
+# Keep package-manager-generated files untouched.
+pnpm-lock.yaml
