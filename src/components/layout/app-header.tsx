@@ -18,7 +18,7 @@ export function AppHeader() {
         <Link
           href="/"
           className="flex items-center gap-3"
-          aria-label="ZMK Display Studio home"
+          title="ZMK Display Studio home"
         >
           <span className="pixel-logo" aria-hidden="true">
             <i />

@@ -5,6 +5,7 @@ import { ChevronDown, Download, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { connectPreferences, useEditorStore } from "@/store/editor-store";
 import { ACCEPTED_IMAGE_TYPES } from "@/lib/image/image-loader";
+import { getDisplay } from "@/lib/displays/registry";
 import { ImageUploader } from "./image-uploader";
 import { EditorToolbar } from "./editor-toolbar";
 import { SettingsPanel } from "./settings-panel";
@@ -20,6 +21,8 @@ export function DisplayEditor() {
   const pipeline = useImagePipeline();
   const showGrid = useEditorStore((state) => state.showPixelGrid);
   const mode = useEditorStore((state) => state.previewMode);
+  const displayId = useEditorStore((state) => state.displayId);
+  const display = getDisplay(displayId);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   useEffect(connectPreferences, []);
@@ -46,8 +49,8 @@ export function DisplayEditor() {
           <span className="text-muted-foreground">Peripheral artwork</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="technical-badge">nice!view</span>
-          <span className="technical-badge">1-bit</span>
+          <span className="technical-badge">{display.name}</span>
+          <span className="technical-badge">{display.colorDepth}-bit</span>
           <Button
             className="lg:hidden"
             size="sm"

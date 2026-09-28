@@ -267,8 +267,10 @@ export function DisplayPreview({
               ))}
             </div>
             <div className="mt-3 flex items-center justify-between font-mono text-[8px] tracking-[0.15em] text-zinc-400">
-              <span>nice!view</span>
-              <span>160 × 68 / 1-BIT</span>
+              <span>{display.name}</span>
+              <span>
+                {display.width} × {display.height} / {display.colorDepth}-BIT
+              </span>
             </div>
           </div>
           <div className="mt-5 flex font-mono text-[9px] text-muted-foreground">

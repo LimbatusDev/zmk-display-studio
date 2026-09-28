@@ -15,7 +15,7 @@ export function EmptyState({
       <div className="empty-display mb-7" aria-hidden="true">
         <span className="empty-display-corner" />
         <Mountain className="size-18 stroke-[0.8]" />
-        <span className="absolute right-3 bottom-3 font-mono text-[8px] tracking-widest">
+        <span className="absolute right-3 bottom-3 font-mono text-[8px] tracking-widest text-muted-foreground">
           YOUR ART HERE
         </span>
       </div>

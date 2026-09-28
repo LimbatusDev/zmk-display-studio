@@ -382,7 +382,7 @@
     padding: 15px 13px 9px;
   }
 }
-@media (max-width: 390px) {
+@media (max-width: 479px) {
   .source-panel > div:last-child {
     grid-template-columns: 1fr;
   }
