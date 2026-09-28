@@ -7,3 +7,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Naming Conventions
+
+- Use kebab-case for folder and file names (for example, `display-editor/` and `display-preview.tsx`).
+- Preserve required framework and tooling names, such as `AGENTS.md`, `README.md`, and Next.js special file conventions.
