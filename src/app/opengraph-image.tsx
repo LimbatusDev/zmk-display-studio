@@ -105,12 +105,8 @@ export default function OpenGraphImage() {
                 height={physical.height}
                 fill="#ffffff"
               />
-              <svg
-                x={statusArea.physical.x}
-                y={statusArea.physical.y}
-                width={statusArea.physical.width}
-                height={statusArea.physical.height}
-                viewBox="0 0 100 30"
+              <g
+                transform={`translate(${statusArea.physical.x} ${statusArea.physical.y}) scale(${statusArea.physical.width / 100} ${statusArea.physical.height / 30})`}
               >
                 <path
                   stroke="#1f2420"
@@ -122,25 +118,20 @@ export default function OpenGraphImage() {
                   fill="#1f2420"
                   d="M11 11h15v7H11zM44 10h6v10h-6zM56 10h6v10h-6z"
                 />
-              </svg>
+              </g>
               <path
                 stroke="#1f2420"
                 d={`M0 ${artwork.physical.y}h${physical.width}`}
               />
-              <svg
-                x={artwork.physical.x}
-                y={artwork.physical.y}
-                width={artwork.physical.width}
-                height={artwork.physical.height}
-                viewBox="0 0 100 200"
-                preserveAspectRatio="none"
+              <g
+                transform={`translate(${artwork.physical.x} ${artwork.physical.y}) scale(${artwork.physical.width / 100} ${artwork.physical.height / 200})`}
               >
                 <circle cx="73" cy="35" r="12" fill="#3f3f3e" />
                 <path fill="#1f2420" d="M0 130L40 65l35 65 25-25v95H0z" />
                 <path fill="#ffffff" d="M40 65l12 35-12-10-10 13-5-14z" />
                 <path fill="#d8ded0" d="M0 165l25-30 25 30 25-40 25 30v45H0z" />
                 <path fill="#3f3f3e" d="M0 185l20-10 35 15 25-20 20 10v20H0z" />
-              </svg>
+              </g>
             </svg>
           </div>
           <span style={{ fontSize: 17, color: "#5f665f", letterSpacing: 2 }}>
