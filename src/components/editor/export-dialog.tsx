@@ -13,6 +13,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useEditorStore } from "@/store/editor-store";
 import type { MonochromeBitmap } from "@/lib/image/bitmap";
 import type { ProcessingSettings } from "@/types/editor";
@@ -52,6 +62,11 @@ const targets: { id: ExportTarget; label: string; description: string }[] = [
       "Config/module shield reusing ZMK support sources. Experimental.",
   },
 ];
+
+const targetOptions = targets.map(({ id, label }) => ({
+  value: id,
+  label: `${label}${id === "custom-shield" ? " · Experimental" : ""}`,
+}));
 
 export function ExportDialog({
   open,
@@ -192,12 +207,12 @@ export function ExportDialog({
             </DialogDescription>
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
               <div className="space-y-2">
-                <label htmlFor="artwork-name" className="text-xs font-medium">
+                <Label htmlFor="artwork-name" className="text-xs">
                   Artwork name
-                </label>
-                <input
+                </Label>
+                <Input
                   id="artwork-name"
-                  className="field w-full font-mono"
+                  className="font-mono md:text-xs"
                   maxLength={100}
                   value={name}
                   disabled={busy}
@@ -219,26 +234,42 @@ export function ExportDialog({
                 </p>
               </div>
               <div className="space-y-2">
-                <label htmlFor="export-target" className="text-xs font-medium">
+                <Label htmlFor="export-target" className="text-xs">
                   ZIP package
-                </label>
-                <select
-                  id="export-target"
-                  className="field w-full"
+                </Label>
+                <Select
+                  items={targetOptions}
                   value={target}
                   disabled={busy}
-                  onChange={(event) =>
-                    setTarget(event.target.value as ExportTarget)
-                  }
+                  onValueChange={(value) => {
+                    if (value !== null) setTarget(value);
+                  }}
                 >
-                  {targets.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.label}
-                      {item.id === "custom-shield" ? " · Experimental" : ""}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-[10px] leading-relaxed text-muted-foreground">
+                  <SelectTrigger
+                    id="export-target"
+                    aria-describedby="export-target-help"
+                    className="w-full text-xs"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent alignItemWithTrigger={false}>
+                    <SelectGroup>
+                      {targetOptions.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                          className="text-xs"
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <p
+                  id="export-target-help"
+                  className="text-[10px] leading-relaxed text-muted-foreground"
+                >
                   {targets.find((item) => item.id === target)?.description}
                 </p>
               </div>

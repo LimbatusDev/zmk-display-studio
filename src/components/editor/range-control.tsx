@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { Slider, SliderLabel, SliderValue } from "@/components/ui/slider";
 
 interface RangeControlProps {
   label: string;
@@ -21,28 +21,23 @@ export function RangeControl({
   onChange,
   disabled,
 }: RangeControlProps) {
-  const id = useId();
   return (
-    <div className="space-y-2.5">
+    <Slider
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      disabled={disabled}
+      onValueChange={onChange}
+      thumbProps={{ "aria-valuetext": formattedValue }}
+      className="space-y-1.5"
+    >
       <div className="flex items-center justify-between text-xs">
-        <label htmlFor={id} className="font-medium">
-          {label}
-        </label>
-        <output htmlFor={id} className="font-mono text-muted-foreground">
-          {formattedValue ?? value}
-        </output>
+        <SliderLabel className="text-xs">{label}</SliderLabel>
+        <SliderValue className="font-mono text-muted-foreground">
+          {() => formattedValue ?? value}
+        </SliderValue>
       </div>
-      <input
-        id={id}
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="range-control"
-      />
-    </div>
+    </Slider>
   );
 }

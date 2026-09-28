@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ChevronDown, Download, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { useEditorStore } from "@/store/editor-store";
 import { ACCEPTED_IMAGE_TYPES } from "@/lib/image/image-loader";
 import { getDisplay } from "@/lib/displays/registry";
@@ -125,22 +127,20 @@ export function DisplayEditor() {
               }{" "}
               px
             </span>
-            <label
-              className={`flex items-center gap-1.5 ${mode !== "pixels" ? "opacity-40" : "cursor-pointer"}`}
+            <Label
+              htmlFor="pixel-grid"
+              className="min-h-7 cursor-pointer gap-1.5 text-[9px] font-normal has-disabled:cursor-default has-disabled:opacity-40"
             >
-              <input
-                type="checkbox"
+              <Checkbox
+                id="pixel-grid"
                 checked={showGrid}
                 disabled={mode !== "pixels"}
-                onChange={(event) =>
-                  useEditorStore
-                    .getState()
-                    .setShowPixelGrid(event.target.checked)
+                onCheckedChange={(checked) =>
+                  useEditorStore.getState().setShowPixelGrid(checked)
                 }
-                className="accent-primary"
               />
               Pixel grid
-            </label>
+            </Label>
           </div>
         </section>
         <aside

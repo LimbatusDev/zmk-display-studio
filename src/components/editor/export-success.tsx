@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, FileCheck2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
   getExportInstructions,
@@ -133,16 +135,18 @@ export function ExportSuccess({
       </section>
 
       <div className="mt-5 border-t pt-4">
-        <label className="flex min-h-9 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-          <input
-            type="checkbox"
+        <Label
+          htmlFor="hide-export-success"
+          className="min-h-9 cursor-pointer text-xs font-normal leading-normal text-muted-foreground"
+        >
+          <Checkbox
+            id="hide-export-success"
             checked={!showExportSuccess}
-            onChange={(event) => setShowExportSuccess(!event.target.checked)}
-            className="size-3.5 shrink-0 accent-primary"
+            onCheckedChange={(checked) => setShowExportSuccess(!checked)}
             aria-describedby="export-success-preference-help"
           />
           Don’t show this again
-        </label>
+        </Label>
         <p
           id="export-success-preference-help"
           className="ml-5.5 text-[11px] leading-relaxed text-muted-foreground"

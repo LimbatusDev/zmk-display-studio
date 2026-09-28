@@ -1,5 +1,10 @@
-import { Copy } from "lucide-react";
+import { ChevronDown, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export function ExportCodePreview({
   code,
@@ -43,18 +48,24 @@ export function ExportCodePreview({
           </code>
         </pre>
       </div>
-      <details className="mt-3 text-[10px] text-muted-foreground">
-        <summary className="cursor-pointer">
+      <Collapsible className="mt-3 text-[10px] text-muted-foreground">
+        <CollapsibleTrigger className="group flex min-h-8 items-center gap-1.5 rounded-sm text-left hover:text-foreground">
+          <ChevronDown
+            className="size-3 shrink-0 transition-transform group-data-panel-open:rotate-180"
+            aria-hidden="true"
+          />
           ZIP contents · {Object.keys(files).length} files
-        </summary>
-        <ul className="mt-2 space-y-1 overflow-x-auto font-mono">
-          {Object.keys(files)
-            .sort()
-            .map((file) => (
-              <li key={file}>{file}</li>
-            ))}
-        </ul>
-      </details>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <ul className="space-y-1 overflow-x-auto pt-2 font-mono">
+            {Object.keys(files)
+              .sort()
+              .map((file) => (
+                <li key={file}>{file}</li>
+              ))}
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
     </>
   );
 }

@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const subscribe = () => () => {};
 const clientSnapshot = () => true;
@@ -21,21 +22,29 @@ export function ThemeSelector() {
   );
 
   return (
-    <div className="theme-selector" role="group" aria-label="Color theme">
+    <ToggleGroup
+      aria-label="Color theme"
+      value={mounted && resolvedTheme ? [resolvedTheme] : []}
+      disabled={!mounted}
+      onValueChange={(values) => {
+        const selected = choices.find(({ theme }) => theme === values[0]);
+        if (selected) setTheme(selected.theme);
+      }}
+      spacing={0.5}
+      className="theme-selector shrink-0 rounded-full border bg-muted p-0.75"
+    >
       {choices.map(({ theme, label, icon: Icon }) => (
-        <button
+        <ToggleGroupItem
           key={theme}
-          type="button"
+          value={theme}
           data-theme-choice={theme}
           aria-label={label}
           title={label}
-          aria-pressed={mounted && resolvedTheme === theme}
-          disabled={!mounted}
-          onClick={() => setTheme(theme)}
+          className="size-8 rounded-full p-0 text-muted-foreground hover:text-primary"
         >
           <Icon className="size-4" aria-hidden="true" />
-        </button>
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   );
 }

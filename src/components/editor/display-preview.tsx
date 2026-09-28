@@ -8,6 +8,7 @@ import {
   Move,
   RectangleHorizontal,
 } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getDisplay } from "@/lib/displays/registry";
 import type { DisplayPreset, RegionBounds } from "@/lib/displays/types";
 import { bitmapToRgba, type MonochromeBitmap } from "@/lib/image/bitmap";
@@ -72,19 +73,27 @@ export function PreviewTabs() {
   const mode = useEditorStore((state) => state.previewMode);
   const setMode = useEditorStore((state) => state.setPreviewMode);
   return (
-    <div className="segmented-control" role="group" aria-label="Preview mode">
+    <ToggleGroup
+      aria-label="Preview mode"
+      value={[mode]}
+      onValueChange={(values) => {
+        const selected = modes.find(({ id }) => id === values[0]);
+        if (selected) setMode(selected.id);
+      }}
+      spacing={0.5}
+      className="max-w-full flex-wrap rounded-md border bg-muted p-0.75"
+    >
       {modes.map(({ id, label, icon: Icon }) => (
-        <button
-          type="button"
+        <ToggleGroupItem
           key={id}
-          aria-pressed={mode === id}
-          onClick={() => setMode(id)}
+          value={id}
+          className="h-7 gap-1.5 rounded-sm px-2 text-[10px] font-normal text-muted-foreground hover:bg-card hover:text-primary aria-pressed:bg-highlight aria-pressed:text-highlight-foreground max-[479px]:gap-1 max-[479px]:px-1.5"
         >
-          <Icon className="size-3.5" />
+          <Icon className="size-3.5 max-[479px]:hidden" aria-hidden="true" />
           {label}
-        </button>
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   );
 }
 

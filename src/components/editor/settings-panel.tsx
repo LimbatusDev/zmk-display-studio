@@ -1,9 +1,31 @@
-import { Info, RotateCcw } from "lucide-react";
+import { ChevronDown, Info, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { displays, getArtworkArea, getDisplay } from "@/lib/displays/registry";
 import { useEditorStore } from "@/store/editor-store";
 import { processingLabels, type ProcessingMode } from "@/types/editor";
 import { RangeControl } from "./range-control";
+
+const displayOptions = displays.map(({ id, name }) => ({
+  value: id,
+  label: name,
+}));
+const processingModes = Object.keys(processingLabels) as ProcessingMode[];
 
 export function SettingsPanel() {
   const state = useEditorStore();
@@ -12,21 +34,33 @@ export function SettingsPanel() {
   return (
     <div className="divide-y">
       <section className="space-y-4 p-5">
-        <label className="block text-xs font-medium" htmlFor="display">
+        <Label className="text-xs" htmlFor="display">
           Display
-        </label>
-        <select
-          id="display"
-          className="field w-full"
+        </Label>
+        <Select
+          items={displayOptions}
           value={state.displayId}
-          onChange={(event) => state.setDisplay(event.target.value)}
+          onValueChange={(value) => {
+            if (value !== null) state.setDisplay(value);
+          }}
         >
-          {displays.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger id="display" className="w-full text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent alignItemWithTrigger={false}>
+            <SelectGroup>
+              {displayOptions.map((item) => (
+                <SelectItem
+                  key={item.value}
+                  value={item.value}
+                  className="text-xs"
+                >
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         <dl className="grid grid-cols-2 gap-y-2 text-[11px]">
           <dt className="text-muted-foreground">Physical display</dt>
           <dd className="text-right font-mono">
@@ -41,44 +75,60 @@ export function SettingsPanel() {
             {display.colorDepth}-bit / monochrome
           </dd>
         </dl>
-        <details className="text-[10px] text-muted-foreground">
-          <summary className="cursor-pointer">
+        <Collapsible className="text-[10px] text-muted-foreground">
+          <CollapsibleTrigger className="group flex min-h-8 items-center gap-1.5 rounded-sm text-left hover:text-foreground">
+            <ChevronDown
+              className="size-3 shrink-0 transition-transform group-data-panel-open:rotate-180"
+              aria-hidden="true"
+            />
             ZMK framebuffer dimensions
-          </summary>
-          <p className="mt-2 font-mono">
-            Display: {display.framebuffer.width} × {display.framebuffer.height}
-            <br />
-            Artwork: {area.framebuffer.width} × {area.framebuffer.height}
-          </p>
-        </details>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <p className="pt-2 font-mono">
+              Display: {display.framebuffer.width} ×{" "}
+              {display.framebuffer.height}
+              <br />
+              Artwork: {area.framebuffer.width} × {area.framebuffer.height}
+            </p>
+          </CollapsibleContent>
+        </Collapsible>
       </section>
       <section className="space-y-5 p-5">
         <fieldset>
-          <legend className="mb-3 text-xs font-medium">Processing</legend>
-          <div className="space-y-1">
-            {(Object.keys(processingLabels) as ProcessingMode[]).map((mode) => (
-              <label
+          <legend id="processing-label" className="mb-3 text-xs font-medium">
+            Processing
+          </legend>
+          <RadioGroup
+            name="processing"
+            value={state.processingMode}
+            onValueChange={(value) => {
+              const mode = processingModes.find((mode) => mode === value);
+              if (mode) state.setProcessing({ processingMode: mode });
+            }}
+            aria-labelledby="processing-label"
+            aria-describedby="processing-help"
+            className="gap-1"
+          >
+            {processingModes.map((mode) => (
+              <Label
                 key={mode}
-                className={`flex cursor-pointer items-center gap-2.5 rounded px-2 py-2 text-xs ${state.processingMode === mode ? "bg-secondary" : "hover:bg-muted"}`}
+                htmlFor={`processing-${mode}`}
+                className="min-h-9 cursor-pointer gap-2.5 rounded-sm px-2 py-2 text-xs font-normal leading-normal hover:bg-muted has-data-checked:bg-secondary"
               >
-                <input
-                  type="radio"
-                  name="processing"
-                  value={mode}
-                  checked={state.processingMode === mode}
-                  onChange={() => state.setProcessing({ processingMode: mode })}
-                  className="accent-primary"
-                />
+                <RadioGroupItem id={`processing-${mode}`} value={mode} />
                 {processingLabels[mode]}
                 {mode === "floyd-steinberg" && (
                   <span className="ml-auto font-mono text-[8px] text-muted-foreground">
                     CLASSIC
                   </span>
                 )}
-              </label>
+              </Label>
             ))}
-          </div>
-          <p className="mt-3 flex gap-1.5 text-[10px] leading-relaxed text-muted-foreground">
+          </RadioGroup>
+          <p
+            id="processing-help"
+            className="mt-3 flex gap-1.5 text-[10px] leading-relaxed text-muted-foreground"
+          >
             <Info className="mt-0.5 size-3 shrink-0" />
             {state.processingMode === "threshold"
               ? "A crisp cutoff. Best for logos and line art."
@@ -110,18 +160,16 @@ export function SettingsPanel() {
           value={state.contrast}
           onChange={(contrast) => state.setProcessing({ contrast })}
         />
-        <label className="flex cursor-pointer items-center justify-between text-xs font-medium">
-          Invert colors
-          <input
-            type="checkbox"
-            role="switch"
+        <div className="flex min-h-8 items-center justify-between gap-3">
+          <Label htmlFor="invert-colors" className="cursor-pointer text-xs">
+            Invert colors
+          </Label>
+          <Switch
+            id="invert-colors"
             checked={state.inverted}
-            onChange={(event) =>
-              state.setProcessing({ inverted: event.target.checked })
-            }
-            className="toggle"
+            onCheckedChange={(inverted) => state.setProcessing({ inverted })}
           />
-        </label>
+        </div>
         <Button
           className="text-muted-foreground"
           variant="ghost"

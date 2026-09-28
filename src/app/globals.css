@@ -82,7 +82,6 @@
   --logo-background: var(--color-brand-primary);
   --logo-pixel: var(--color-white);
   --logo-accent: var(--color-brand-lime);
-  --toggle-thumb: var(--color-white);
 }
 
 :root.dark {
@@ -103,7 +102,6 @@
   --logo-background: var(--color-brand-lime);
   --logo-pixel: var(--color-brand-primary);
   --logo-accent: var(--color-brand-indigo);
-  --toggle-thumb: var(--color-text);
   --shadow-card: 0 18px 50px rgb(0 0 0 / 18%);
   --shadow-elevated: 0 28px 80px rgb(0 0 0 / 35%);
 }
@@ -188,26 +186,6 @@
   background: var(--muted);
   color: var(--primary);
 }
-.theme-selector {
-  display: inline-flex;
-  flex-shrink: 0;
-  padding: 3px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--muted);
-}
-.theme-selector button {
-  display: flex;
-  width: 32px;
-  height: 32px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: var(--muted-foreground);
-}
-.theme-selector button:hover {
-  color: var(--primary);
-}
 /* The pre-paint root class also styles the selector before React hydrates. */
 :root:not(.dark) .theme-selector [data-theme-choice="light"],
 :root.dark .theme-selector [data-theme-choice="dark"] {
@@ -287,83 +265,6 @@
 .upload-zone.is-dragging {
   border-color: var(--primary);
   background: color-mix(in srgb, var(--color-brand-lime) 25%, var(--card));
-}
-.field {
-  min-height: 36px;
-  border: 1px solid var(--control-border);
-  border-radius: var(--radius-md);
-  background: var(--card);
-  padding: 7px 10px;
-  font-size: 12px;
-}
-.range-control {
-  display: block;
-  width: 100%;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--primary);
-  cursor: pointer;
-}
-.range-control:disabled {
-  cursor: default;
-}
-.toggle {
-  appearance: none;
-  width: 29px;
-  height: 17px;
-  border-radius: 20px;
-  background: var(--muted-foreground);
-  position: relative;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.15s;
-}
-.toggle::after {
-  content: "";
-  position: absolute;
-  width: 11px;
-  height: 11px;
-  top: 3px;
-  left: 3px;
-  border-radius: 50%;
-  background: var(--toggle-thumb);
-  transition: transform 0.15s;
-}
-.toggle:checked {
-  background: var(--primary);
-}
-.toggle:checked::after {
-  transform: translateX(12px);
-}
-.segmented-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 3px;
-  background: var(--muted);
-  max-width: 100%;
-  flex-wrap: wrap;
-}
-.segmented-control button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 9px;
-  border-radius: var(--radius-sm);
-  font-size: 10px;
-  color: var(--muted-foreground);
-}
-.segmented-control button:hover {
-  color: var(--primary);
-  background: var(--card);
-}
-.segmented-control button[aria-pressed="true"] {
-  color: var(--highlight-foreground);
-  background: var(--color-brand-lime);
-  box-shadow: inset 0 0 0 1px
-    color-mix(in srgb, var(--primary) 12%, transparent);
 }
 .empty-display {
   width: 112px;
@@ -613,13 +514,6 @@
   }
 }
 @media (max-width: 479px) {
-  .segmented-control button {
-    gap: 4px;
-    padding: 6px;
-  }
-  .segmented-control button svg {
-    display: none;
-  }
   .source-panel > div:last-child {
     grid-template-columns: 1fr;
   }

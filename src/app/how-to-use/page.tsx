@@ -169,10 +169,9 @@ export default function HowToUsePage() {
           steps for the file or package you downloaded. Select{" "}
           <strong>Don’t show this again</strong> to turn off automatic
           celebrations for all downloads in this browser.{" "}
-          <strong>View installation steps</strong>
-          remains available after a download; reopen it and uncheck the option
-          to turn celebrations back on. Copying C code keeps its inline
-          confirmation.
+          <strong>View installation steps</strong> remains available after a
+          download; reopen it and uncheck the option to turn celebrations back
+          on. Copying C code keeps its inline confirmation.
         </p>
         <p>
           For the full instructions, follow the{" "}
