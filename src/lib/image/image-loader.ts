@@ -18,6 +18,7 @@ export async function loadImage(file: File): Promise<SourceImage> {
   validateImageFile(file);
   const element = new Image();
   const url = URL.createObjectURL(file);
+  let source: SourceImage;
   try {
     element.src = url;
     await element.decode();
@@ -32,7 +33,7 @@ export async function loadImage(file: File): Promise<SourceImage> {
         "Image dimensions are too large. Use up to 40 megapixels and 16,384 pixels per side.",
       );
     }
-    return { name: file.name, width, height, size: file.size, url, element };
+    source = { name: file.name, width, height, size: file.size, url, element };
   } catch (error) {
     element.src = "";
     if (error instanceof Error && error.name !== "EncodingError") throw error;
@@ -43,6 +44,7 @@ export async function loadImage(file: File): Promise<SourceImage> {
     // Canvas uses the decoded element, so the Blob URL is no longer needed.
     URL.revokeObjectURL(url);
   }
+  return source;
 }
 
 export function releaseImage(source: SourceImage | null) {
