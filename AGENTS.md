@@ -25,9 +25,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Editor architecture
 
-- `src/app/page.tsx` renders the client boundary in `src/components/editor/display-editor.tsx`. `use-image-pipeline.ts` rasterizes the transformed source with browser Canvas, then calls `src/lib/image/pipeline.ts`; preview and export consume the same bitmap. Keep processing/export local to the browser.
+- `src/app/page.tsx` renders the client boundary in `src/components/editor/display-editor.tsx`. `use-image-pipeline.ts` rasterizes the transformed source in physical artwork coordinates, then calls `processArtwork` in `src/lib/image/pipeline.ts`. Physical/Pixels use `physicalBitmap`; Framebuffer and every export use the derived `framebufferBitmap`. Keep processing/export local to the browser.
 - `src/store/editor-store.ts` owns editor state and releases replaced source images. `connectPreferences` runs after hydration and persists only Zod-validated processing/preview preferences; images and transforms stay in memory.
-- Display geometry comes from `src/lib/displays/registry.ts`. Only nice!view is registered; its 160×68 display contains 140×68 artwork plus a 20×68 status area. The status preview is simulated and excluded from exported artwork. `nice-view-artwork.ts` is specifically tied to this preset, so adding a registry entry alone does not add export support.
+- Display geometry comes from `src/lib/displays/registry.ts`. Only nice!view is registered: physical display 68×160, artwork 68×140 below a top 68×20 status strip; framebuffer display 160×68, artwork 140×68 beside a right 20×68 status strip. Use explicit `.physical`/`.framebuffer` sizes and positions from the preset. `physical.rotation` means clockwise physical-to-framebuffer conversion (90 for nice!view). Process/dither/invert in physical coordinates, then rotate unpacked pixels once. The status preview is simulated and excluded from export. `nice-view-artwork.ts` accepts framebuffer artwork and is preset-specific, so adding a registry entry alone does not add export support.
 
 ## Firmware export invariants
 

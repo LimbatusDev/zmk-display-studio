@@ -175,13 +175,6 @@
   border-color: var(--primary);
   background: #f3e8d8;
 }
-.source-thumbnail {
-  width: 100%;
-  height: auto;
-  background: repeating-conic-gradient(#ebede4 0% 25%, #f8f9f3 0% 50%) 50% /
-    12px 12px;
-  border-radius: 4px 4px 0 0;
-}
 .field {
   min-height: 36px;
   border: 1px solid var(--border);
@@ -237,6 +230,8 @@
   border-radius: 5px;
   padding: 3px;
   background: var(--muted);
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 .segmented-control button {
   display: flex;
@@ -253,8 +248,7 @@
   box-shadow: 0 1px 3px #00000012;
 }
 .empty-display {
-  width: 230px;
-  height: 125px;
+  width: 112px;
   border: 1px solid #b1b7a5;
   border-radius: 6px;
   display: flex;
@@ -292,9 +286,16 @@
 }
 .device-screen {
   background: white;
-  border: 2px solid #11150e;
+  outline: 2px solid #11150e;
   overflow: hidden;
   box-shadow: 0 0 0 2px #535749;
+}
+.preview-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: clamp(400px, 65svh, 560px);
 }
 .device-screw {
   position: absolute;
@@ -383,6 +384,13 @@
   }
 }
 @media (max-width: 479px) {
+  .segmented-control button {
+    gap: 4px;
+    padding: 6px;
+  }
+  .segmented-control button svg {
+    display: none;
+  }
   .source-panel > div:last-child {
     grid-template-columns: 1fr;
   }

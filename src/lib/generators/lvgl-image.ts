@@ -1,6 +1,19 @@
+import type { Size } from "../displays/types.ts";
 import { packMonochrome, type MonochromeBitmap } from "../image/bitmap.ts";
 import { requireCIdentifier } from "./c-identifier.ts";
 import { niceViewGenerator } from "./metadata.ts";
+
+const palette = new Uint8Array([0, 0, 0, 255, 255, 255, 255, 255]);
+
+export function getLvglImageLayout({ width, height }: Size) {
+  const stride = Math.ceil(width / 8);
+  return {
+    stride,
+    paletteSize: palette.length,
+    dataSize: palette.length + stride * height,
+    paddingBits: stride * 8 - width,
+  };
+}
 
 /**
  * Matches ZMK nice_view/widgets/art.c at the revision in metadata.ts, and the
@@ -13,10 +26,11 @@ import { niceViewGenerator } from "./metadata.ts";
  */
 export function encodeLvglImage(bitmap: MonochromeBitmap) {
   const packed = packMonochrome(bitmap);
-  const data = new Uint8Array(8 + packed.length);
-  data.set([0, 0, 0, 255, 255, 255, 255, 255]);
-  data.set(packed, 8);
-  return { data, stride: Math.ceil(bitmap.width / 8) };
+  const { stride, dataSize } = getLvglImageLayout(bitmap);
+  const data = new Uint8Array(dataSize);
+  data.set(palette);
+  data.set(packed, palette.length);
+  return { data, stride };
 }
 
 export function generateLvglImage(
@@ -26,7 +40,7 @@ export function generateLvglImage(
   const symbol = requireCIdentifier(artworkName);
   const { data, stride } = encodeLvglImage(bitmap);
   const lines: string[] = [];
-  for (let i = 8; i < data.length; i += stride) {
+  for (let i = palette.length; i < data.length; i += stride) {
     lines.push(
       `    ${Array.from(data.subarray(i, i + stride), (value) => `0x${value.toString(16).padStart(2, "0")}`).join(", ")},`,
     );

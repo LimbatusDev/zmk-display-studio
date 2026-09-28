@@ -1,10 +1,21 @@
-export interface ArtworkArea {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
+/** Clockwise physical-to-framebuffer rotation with a top-left origin (+y down). */
+export type Rotation = 0 | 90 | 180 | 270;
+
+export interface Size {
   width: number;
   height: number;
+}
+
+export interface RegionBounds extends Size {
+  x: number;
+  y: number;
+}
+
+export interface DisplayRegion {
+  id: string;
+  name: string;
+  framebuffer: RegionBounds;
+  physical: RegionBounds;
 }
 
 export type ExportTarget = "c-image" | "nice-view-artwork" | "custom-shield";
@@ -13,11 +24,10 @@ export interface DisplayPreset {
   id: string;
   name: string;
   manufacturer?: string;
-  width: number;
-  height: number;
+  framebuffer: Size;
+  physical: Size & { rotation: Rotation };
   colorDepth: 1 | 2 | 4 | 8 | 16;
-  orientation: "horizontal" | "vertical";
-  artworkAreas: readonly ArtworkArea[];
-  statusAreas: readonly ArtworkArea[];
+  artwork: DisplayRegion;
+  statusArea?: DisplayRegion;
   exportTargets: readonly ExportTarget[];
 }

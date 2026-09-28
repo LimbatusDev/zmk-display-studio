@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { loadImage, releaseImage } from "@/lib/image/image-loader";
 import { createSampleArtwork } from "@/lib/image/sample-artwork";
 import { useEditorStore } from "@/store/editor-store";
+import { getDisplay } from "@/lib/displays/registry";
 
 export function useImageUpload() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +43,12 @@ export function useImageUpload() {
     setError(null);
     useEditorStore.getState().setSourceImage(null);
   };
-  const sample = () => upload(createSampleArtwork());
+  const sample = () =>
+    upload(
+      createSampleArtwork(
+        getDisplay(useEditorStore.getState().displayId).artwork.physical,
+      ),
+    );
   return {
     inputRef,
     busy,

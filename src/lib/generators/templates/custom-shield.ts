@@ -1,3 +1,5 @@
+import { niceView } from "../../displays/nice-view.ts";
+
 /** Required shield definitions derived from ZMK nice_view, MIT license. */
 export const customShieldFiles: Record<string, string> = {
   "zephyr/module.yml": `name: zmk-display-studio-artwork
@@ -67,8 +69,8 @@ CONFIG_ZMK_DISPLAY_DEDICATED_THREAD_STACK_SIZE=4096
         compatible = "sharp,ls0xx";
         spi-max-frequency = <1000000>;
         reg = <0>;
-        width = <160>;
-        height = <68>;
+        width = <${niceView.framebuffer.width}>;
+        height = <${niceView.framebuffer.height}>;
         serial-vcom-inversion;
         serial-vcom-interval = <33>;
     };

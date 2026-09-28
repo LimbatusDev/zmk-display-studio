@@ -77,8 +77,12 @@ test("descriptor declares dimensions, magic, stride and real data length", () =>
 });
 
 test("nice!view exports reject an accidental display-sized bitmap", () => {
-  assert.equal(getDisplay("nice-view").width, 160);
-  assert.equal(getArtworkArea("nice-view", "peripheral").width, 140);
+  assert.equal(getDisplay("nice-view").framebuffer.width, 160);
+  assert.equal(
+    getArtworkArea("nice-view", "peripheral").framebuffer.width,
+    140,
+  );
+  assert.equal(getArtworkArea("nice-view", "peripheral").physical.width, 68);
   assert.throws(() => getDisplay("unknown"), /Unsupported display/);
   assert.throws(
     () => getArtworkArea("nice-view", "unknown"),
@@ -107,11 +111,17 @@ test("customization includes both replacement files and no random artwork path",
     files["app/boards/shields/nice_view/widgets/peripheral_status.c"];
   assert.match(widget, /LV_IMAGE_DECLARE\(my_logo\)/);
   assert.match(widget, /lv_image_set_src\(art, &my_logo\)/);
+  assert.match(widget, /lv_obj_set_size\(widget->obj, 160, 68\)/);
+  assert.match(widget, /lv_obj_align\(art, LV_ALIGN_TOP_LEFT, 0, 0\)/);
   assert.doesNotMatch(widget, /balloon|mountain|sys_rand|lv_img_set_src/);
   assert.ok(files["app/boards/shields/nice_view/widgets/art.c"]);
   assert.match(files["README.md"], /ZMK checkout/);
   assert.match(files["README.md"], /Processing: Floyd–Steinberg/);
   assert.match(files["README.md"], /Inverted: No/);
+  assert.match(files["README.md"], /Generator: nice-view-zmk-main v2/);
+  assert.match(files["README.md"], /rotated 90° clockwise once/);
+  assert.match(files["README.md"], /Row stride: 18 bytes/);
+  assert.match(files["README.md"], /Data size: 1232 bytes/);
 });
 
 test("shield package has discovery, hardware, build, and peripheral integration", () => {
@@ -147,6 +157,8 @@ test("shield package has discovery, hardware, build, and peripheral integration"
     /#include "peripheral_status.h"/,
   );
   assert.match(files["README.md"], /Experimental/);
+  assert.match(files[base + "nice_view_custom.overlay"], /width = <160>;/);
+  assert.match(files[base + "nice_view_custom.overlay"], /height = <68>;/);
 });
 
 test("all ZIP packages contain installation instructions and reproducible content", async () => {

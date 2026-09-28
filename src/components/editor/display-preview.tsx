@@ -1,11 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type PointerEvent,
-  type KeyboardEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BatteryMedium,
   Bluetooth,
@@ -13,19 +6,67 @@ import {
   Image,
   Monitor,
   Move,
+  RectangleHorizontal,
 } from "lucide-react";
 import { getDisplay } from "@/lib/displays/registry";
-import type { ArtworkArea } from "@/lib/displays/types";
+import type { DisplayPreset, RegionBounds } from "@/lib/displays/types";
 import { bitmapToRgba, type MonochromeBitmap } from "@/lib/image/bitmap";
 import { useEditorStore } from "@/store/editor-store";
-import type { ImageTransform, PreviewMode } from "@/types/editor";
+import type { PreviewMode } from "@/types/editor";
+import { ArtworkViewport } from "./artwork-viewport";
 import { ImageCanvas } from "./image-canvas";
 
 const modes = [
-  { id: "device", label: "Device", icon: Monitor },
+  { id: "physical", label: "Physical", icon: Monitor },
   { id: "pixels", label: "Pixels", icon: Grid2X2 },
+  { id: "framebuffer", label: "Framebuffer", icon: RectangleHorizontal },
   { id: "source", label: "Source", icon: Image },
 ] as const;
+
+function describePreview(
+  mode: PreviewMode,
+  display: DisplayPreset,
+  scale: number,
+  showGrid: boolean,
+) {
+  const { artwork, physical, statusArea } = display;
+  const physicalDimensions = `${artwork.physical.width} × ${artwork.physical.height} px`;
+  switch (mode) {
+    case "physical":
+      return {
+        badge: "Physical display preview",
+        title: display.name,
+        dimensions: `${physical.width} × ${physical.height} physical · Artwork: ${artwork.physical.width} × ${artwork.physical.height}`,
+        note: statusArea
+          ? `Top ${statusArea.physical.width}×${statusArea.physical.height} status is simulated. Only artwork is exported.`
+          : "Only artwork is exported.",
+      };
+    case "framebuffer":
+      return {
+        badge: "ZMK framebuffer",
+        title: "ZMK framebuffer artwork",
+        dimensions: `${artwork.framebuffer.width} × ${artwork.framebuffer.height} px`,
+        note: "Exact bitmap sent to the ZMK/LVGL encoder.",
+      };
+    case "pixels":
+      return {
+        badge: `${scale}× physical pixel preview`,
+        title: "Physical artwork",
+        dimensions: physicalDimensions,
+        note:
+          showGrid && scale < 3
+            ? "Pixel grid appears at 3× and above. Enlarge the preview window."
+            : "Shift + arrow moves 10 physical pixels.",
+      };
+    case "source":
+      return {
+        badge: "Source · transformed physical crop",
+        title: "Physical source crop",
+        dimensions: physicalDimensions,
+        note: "Shift + arrow moves 10 physical pixels.",
+      };
+  }
+}
 
 export function PreviewTabs() {
   const mode = useEditorStore((state) => state.previewMode);
@@ -85,226 +126,170 @@ function PixelGrid({
   );
 }
 
-function usePan() {
-  const start = useRef<{
-    id: number;
-    x: number;
-    y: number;
-    ratio: number;
-    transform: ImageTransform;
-  } | null>(null);
-  const pending = useRef<Partial<ImageTransform> | null>(null);
-  const frame = useRef(0);
-  useEffect(() => () => cancelAnimationFrame(frame.current), []);
-  const flush = () => {
-    cancelAnimationFrame(frame.current);
-    frame.current = 0;
-    if (pending.current)
-      useEditorStore.getState().setTransform(pending.current);
-    pending.current = null;
-  };
-  return {
-    onPointerDown: (event: PointerEvent<HTMLDivElement>, width: number) => {
-      if (event.button !== 0 || start.current) return;
-      event.currentTarget.focus({ preventScroll: true });
-      event.currentTarget.setPointerCapture(event.pointerId);
-      start.current = {
-        id: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        ratio: width / event.currentTarget.getBoundingClientRect().width,
-        transform: useEditorStore.getState().transform,
-      };
-    },
-    onPointerMove: (event: PointerEvent<HTMLDivElement>) => {
-      const initial = start.current;
-      if (!initial || initial.id !== event.pointerId) return;
-      pending.current = {
-        offsetX:
-          initial.transform.offsetX +
-          (event.clientX - initial.x) * initial.ratio,
-        offsetY:
-          initial.transform.offsetY +
-          (event.clientY - initial.y) * initial.ratio,
-      };
-      if (!frame.current) frame.current = requestAnimationFrame(flush);
-    },
-    finish: () => {
-      flush();
-      start.current = null;
-    },
-    onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
-      const deltas: Record<string, [number, number]> = {
-        ArrowLeft: [-1, 0],
-        ArrowRight: [1, 0],
-        ArrowUp: [0, -1],
-        ArrowDown: [0, 1],
-      };
-      const delta = deltas[event.key];
-      if (!delta) return;
-      event.preventDefault();
-      const state = useEditorStore.getState();
-      const distance = event.shiftKey ? 10 : 1;
-      state.setTransform({
-        offsetX: state.transform.offsetX + delta[0] * distance,
-        offsetY: state.transform.offsetY + delta[1] * distance,
-      });
-    },
-  };
-}
-
 export function DisplayPreview({
-  bitmap,
+  physicalBitmap,
+  framebufferBitmap,
   source,
-  area,
 }: {
-  bitmap: MonochromeBitmap;
+  physicalBitmap: MonochromeBitmap;
+  framebufferBitmap: MonochromeBitmap;
   source: Uint8ClampedArray;
-  area: ArtworkArea;
 }) {
   const mode = useEditorStore((state) => state.previewMode);
   const showGrid = useEditorStore((state) => state.showPixelGrid);
   const displayId = useEditorStore((state) => state.displayId);
   const display = getDisplay(displayId);
-  const container = useRef<HTMLDivElement>(null);
+  const area = display.artwork.physical;
+  const stage = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(2);
-  const pan = usePan();
-  const processed = useMemo(() => bitmapToRgba(bitmap), [bitmap]);
+  const description = describePreview(mode, display, scale, showGrid);
+  const processed = useMemo(
+    () => bitmapToRgba(physicalBitmap),
+    [physicalBitmap],
+  );
+  const framebuffer = useMemo(
+    () => bitmapToRgba(framebufferBitmap),
+    [framebufferBitmap],
+  );
+  const size =
+    mode === "physical"
+      ? display.physical
+      : mode === "framebuffer"
+        ? display.artwork.framebuffer
+        : area;
 
   useEffect(() => {
-    const element = container.current;
+    const element = stage.current;
     if (!element) return;
-    const observer = new ResizeObserver(([entry]) =>
+    const observer = new ResizeObserver(([entry]) => {
+      const available = entry.contentRect;
       setScale(
-        Math.max(1, Math.floor((entry.contentRect.width - 32) / area.width)),
-      ),
-    );
+        Math.max(
+          1,
+          Math.floor(
+            Math.min(
+              (available.width - 56) / size.width,
+              (available.height - 64) / size.height,
+            ),
+          ),
+        ),
+      );
+    });
     observer.observe(element);
     return () => observer.disconnect();
-  }, [area.width]);
+  }, [size.width, size.height]);
 
-  const artwork = (previewMode: PreviewMode) => (
-    <div
-      className="artwork-interaction relative touch-none cursor-grab active:cursor-grabbing"
-      tabIndex={0}
-      role="group"
-      aria-label="Artwork position"
-      aria-describedby="pan-help"
-      onPointerDown={(event) => pan.onPointerDown(event, area.width)}
-      onPointerMove={pan.onPointerMove}
-      onPointerUp={pan.finish}
-      onPointerCancel={pan.finish}
-      onLostPointerCapture={pan.finish}
-      onKeyDown={pan.onKeyDown}
+  const placement = (region: RegionBounds) => ({
+    left: `${(region.x / display.physical.width) * 100}%`,
+    top: `${(region.y / display.physical.height) * 100}%`,
+    width: `${(region.width / display.physical.width) * 100}%`,
+    height: `${(region.height / display.physical.height) * 100}%`,
+  });
+  const artwork = (
+    <ArtworkViewport
+      rgba={mode === "source" ? source : processed}
+      width={area.width}
+      height={area.height}
+      label={
+        mode === "source"
+          ? "Transformed source before monochrome processing"
+          : `Physical monochrome artwork: ${area.width} by ${area.height} pixels`
+      }
+      pixelated={mode !== "source"}
+      descriptionId="pan-help"
     >
-      <ImageCanvas
-        rgba={previewMode === "source" ? source : processed}
-        width={area.width}
-        height={area.height}
-        label={
-          previewMode === "source"
-            ? "Transformed source before monochrome conversion"
-            : `Exact ${area.width} by ${area.height} monochrome artwork`
-        }
-        pixelated={previewMode !== "source"}
-      />
-      {previewMode === "pixels" && showGrid && scale >= 3 && (
+      {mode === "pixels" && showGrid && scale >= 3 && (
         <PixelGrid width={area.width} height={area.height} scale={scale} />
       )}
-    </div>
+    </ArtworkViewport>
   );
 
   return (
-    <div
-      ref={container}
-      className="flex min-h-96 flex-1 flex-col items-center justify-center gap-8 py-10"
-    >
+    <div className="flex flex-1 flex-col items-center justify-center py-6">
       <div className="flex items-center gap-2 font-mono text-[9px] tracking-widest text-muted-foreground uppercase">
         <span className="size-1.5 rounded-full bg-emerald-600" />
-        {mode === "device"
-          ? "Live device preview"
-          : mode === "pixels"
-            ? `${scale}× pixel preview`
-            : "Original · transformed crop"}
+        {description.badge}
       </div>
-      {mode === "device" ? (
-        <div className="w-[calc(100%-2rem)] max-w-[640px]">
+      <div ref={stage} className="preview-stage">
+        {mode === "physical" ? (
           <div className="device-frame">
             <div className="device-screw left-2 top-2" />
             <div className="device-screw right-2 bottom-2" />
             <div
               className="device-screen relative"
-              style={{ aspectRatio: `${display.width} / ${display.height}` }}
+              style={{
+                width: display.physical.width * scale,
+                height: display.physical.height * scale,
+              }}
             >
-              <div
-                className="absolute"
-                style={{
-                  left: `${(area.x / display.width) * 100}%`,
-                  top: `${(area.y / display.height) * 100}%`,
-                  width: `${(area.width / display.width) * 100}%`,
-                }}
-              >
-                {artwork(mode)}
-              </div>
-              {display.statusAreas.map((status) => (
+              {display.statusArea && (
                 <div
-                  key={status.id}
-                  className="absolute flex h-full flex-col items-center justify-between border-l border-black/30 py-[4%] text-black"
+                  className="absolute flex items-center justify-evenly border-b border-black/30 text-black"
                   style={{
-                    left: `${(status.x / display.width) * 100}%`,
-                    top: `${(status.y / display.height) * 100}%`,
-                    width: `${(status.width / display.width) * 100}%`,
-                    height: `${(status.height / display.height) * 100}%`,
+                    ...placement(display.statusArea.physical),
+                    fontSize: scale * 5,
                   }}
-                  aria-label="Simulated status, excluded from export"
+                  role="img"
+                  aria-label="Simulated status: battery 82 percent, Bluetooth connected; excluded from export"
                 >
-                  <Bluetooth className="w-[35%]" />
-                  <span className="font-mono text-[clamp(6px,1vw,11px)] font-bold">
-                    82%
-                  </span>
-                  <BatteryMedium className="w-[55%]" />
+                  <BatteryMedium
+                    style={{ width: scale * 10, height: scale * 7 }}
+                  />
+                  <span className="font-mono font-bold">82%</span>
+                  <Bluetooth style={{ width: scale * 7, height: scale * 7 }} />
                 </div>
-              ))}
+              )}
+              <div className="absolute" style={placement(area)}>
+                {artwork}
+              </div>
             </div>
-            <div className="mt-3 flex items-center justify-between font-mono text-[8px] tracking-[0.15em] text-zinc-400">
+            <div className="mt-3 flex justify-between font-mono text-[8px] tracking-widest text-zinc-400">
               <span>{display.name}</span>
-              <span>
-                {display.width} × {display.height} / {display.colorDepth}-BIT
-              </span>
+              <span>{display.colorDepth}-BIT</span>
             </div>
           </div>
-          <div className="mt-5 flex font-mono text-[9px] text-muted-foreground">
-            <span
-              className="dimension-line"
-              style={{ width: `${(area.width / display.width) * 100}%` }}
-            >
-              {area.width}px artwork
-            </span>
-            <span className="dimension-line flex-1">status</span>
+        ) : mode === "framebuffer" ? (
+          <div
+            className="box-content border border-zinc-400 shadow-sm"
+            style={{ width: framebufferBitmap.width * scale }}
+          >
+            <ImageCanvas
+              rgba={framebuffer}
+              width={framebufferBitmap.width}
+              height={framebufferBitmap.height}
+              label={`ZMK framebuffer artwork: ${framebufferBitmap.width} by ${framebufferBitmap.height} pixels`}
+            />
           </div>
-        </div>
-      ) : (
-        <div
-          className="max-w-full overflow-auto border border-zinc-400 shadow-sm"
-          style={{ width: area.width * scale }}
-        >
-          {artwork(mode)}
-        </div>
-      )}
+        ) : (
+          <div
+            className="box-content border border-zinc-400 shadow-sm"
+            style={{ width: area.width * scale }}
+          >
+            {artwork}
+          </div>
+        )}
+      </div>
       <div className="space-y-2 px-4 text-center">
-        <p
-          id="pan-help"
-          className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground"
-        >
-          <Move className="size-3" />
-          Drag artwork to reposition · Arrow keys to nudge
+        <p className="text-xs font-medium">{description.title}</p>
+        <p className="font-mono text-[10px] text-muted-foreground">
+          {description.dimensions}
         </p>
-        <p className="font-mono text-[9px] text-muted-foreground">
-          {mode === "device"
-            ? "Status is simulated. Only artwork is exported."
-            : mode === "pixels" && showGrid && scale < 3
-              ? "Pixel grid appears at 3× and above. Widen the preview."
-              : "Shift + arrow moves 10 pixels. Source stays untouched."}
+        {mode === "framebuffer" ? (
+          <p className="max-w-80 text-[10px] leading-relaxed text-muted-foreground">
+            ZMK uses a rotated {size.width}×{size.height} framebuffer
+            representation for this artwork.
+          </p>
+        ) : (
+          <p
+            id="pan-help"
+            className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground"
+          >
+            <Move className="size-3 shrink-0" />
+            Drag artwork to reposition · Arrow keys to nudge
+          </p>
+        )}
+        <p className="max-w-80 font-mono text-[9px] leading-relaxed text-muted-foreground">
+          {description.note}
         </p>
       </div>
     </div>

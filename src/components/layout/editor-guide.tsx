@@ -1,3 +1,7 @@
+import { niceView } from "@/lib/displays/nice-view";
+
+const { physical, framebuffer, artwork, statusArea } = niceView;
+
 const steps = [
   {
     title: "Compose your image",
@@ -7,7 +11,7 @@ const steps = [
   {
     title: "Find your monochrome style",
     description:
-      "Use threshold for crisp black-and-white shapes, or Floyd–Steinberg and Atkinson dithering to preserve shading. Tune brightness and contrast, then inspect the device and pixel previews.",
+      "Use threshold for crisp black-and-white shapes, or Floyd–Steinberg and Atkinson dithering to preserve shading. Tune brightness and contrast, then inspect the Physical and Pixels previews.",
   },
   {
     title: "Export for your ZMK build",
@@ -19,8 +23,7 @@ const steps = [
 const questions = [
   {
     question: "What size is nice!view artwork?",
-    answer:
-      "The nice!view display is 160 × 68 pixels. This editor targets the 140 × 68 pixel artwork area on a split keyboard’s peripheral side. The remaining 20 × 68 pixels are reserved for status information. The simulated status preview is excluded from your exported artwork.",
+    answer: `In its usual portrait mounting, nice!view is ${physical.width} × ${physical.height} pixels. Compose artwork in the ${artwork.physical.width} × ${artwork.physical.height} physical area below the ${statusArea.physical.width} × ${statusArea.physical.height} status strip. ZMK uses a rotated ${framebuffer.width} × ${framebuffer.height} framebuffer with ${artwork.framebuffer.width} × ${artwork.framebuffer.height} artwork. The editor handles that conversion automatically. Simulated status is excluded from export.`,
   },
   {
     question: "Are my images uploaded anywhere?",

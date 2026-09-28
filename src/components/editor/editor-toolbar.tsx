@@ -17,7 +17,7 @@ export function EditorToolbar() {
   const bounds = state.sourceImage
     ? zoomBounds(
         state.sourceImage,
-        getArtworkArea(state.displayId, state.artworkAreaId),
+        getArtworkArea(state.displayId, state.artworkAreaId).physical,
       )
     : { min: 0.1, max: 8, base: 1 };
   const disabled = !state.sourceImage;

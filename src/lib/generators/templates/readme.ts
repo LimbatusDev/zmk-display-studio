@@ -1,9 +1,11 @@
+import { niceView } from "../../displays/nice-view.ts";
 import type { ExportTarget } from "../../displays/types.ts";
 import {
   processingLabels,
   type ProcessingSettings,
 } from "../../../types/editor.ts";
 import { niceViewGenerator } from "../metadata.ts";
+import { getLvglImageLayout } from "../lvgl-image.ts";
 
 const installations: Record<ExportTarget, (symbol: string) => string> = {
   "c-image": (
@@ -75,10 +77,17 @@ export function generateReadme(
   symbol: string,
   settings: ProcessingSettings,
 ) {
+  const { physical, framebuffer, artwork } = niceView;
+  const { stride, paletteSize, dataSize, paddingBits } = getLvglImageLayout(
+    artwork.framebuffer,
+  );
   return `# ZMK Display Studio Export
 
-Display: nice!view (160×68)
-Artwork: 140×68
+Display: ${niceView.name}
+Physical display: ${physical.width}×${physical.height}
+Physical artwork: ${artwork.physical.width}×${artwork.physical.height}
+ZMK framebuffer: ${framebuffer.width}×${framebuffer.height}
+ZMK artwork representation: ${artwork.framebuffer.width}×${artwork.framebuffer.height}
 Generator: ${niceViewGenerator.id} v${niceViewGenerator.version}
 Symbol: ${symbol}
 Processing: ${processingLabels[settings.processingMode]}
@@ -93,11 +102,18 @@ ${installations[target](symbol)}
 
 ## Encoding and compatibility
 
+- Processing and dithering run in physical artwork coordinates. The finished pixels
+  are rotated ${physical.rotation}° clockwise once into the ZMK framebuffer representation,
+  with no resampling or additional dithering. Export writes that framebuffer bitmap directly.
+- Coordinates start at the top left, with +y downward. For this clockwise conversion,
+  physical artwork pixel (x, y) maps to framebuffer pixel (${artwork.physical.height} - 1 - y, x).
+  The pinned upstream LVGL helper calls this mapping ROTATION_270; the studio uses
+  clockwise physical-to-framebuffer angles.
 - Target: ZMK main at ${niceViewGenerator.zmkRevision}.
 - LVGL revision: ${niceViewGenerator.lvglRevision} (9.3.0-dev).
-- Format: LV_COLOR_FORMAT_I1, opaque black/white BGRA palette (8 bytes).
-- Row stride: 18 bytes, MSB-first, 4 zero padding bits per row.
-- Data size: 1232 bytes. Status UI is NOT part of the artwork.
+- Format: LV_COLOR_FORMAT_I1, opaque black/white BGRA palette (${paletteSize} bytes).
+- Row stride: ${stride} bytes, MSB-first, ${paddingBits} zero padding bits per row.
+- Data size: ${dataSize} bytes. Status UI is NOT part of the artwork.
 - The preview's inversion is baked into the pixels. The artwork palette is fixed;
   CONFIG_NICE_VIEW_WIDGET_INVERTED can invert the status UI but not this image.
 - Transparent pixels and uncovered crop space are composited onto white before adjustments.

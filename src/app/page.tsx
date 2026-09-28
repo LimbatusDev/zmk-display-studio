@@ -4,6 +4,7 @@ import { AppFooter } from "@/components/layout/app-footer";
 import { EditorGuide } from "@/components/layout/editor-guide";
 import { DisplayEditor } from "@/components/editor/display-editor";
 import { site } from "@/lib/site";
+import { niceView } from "@/lib/displays/nice-view";
 
 export const metadata: Metadata = {
   alternates: { canonical: site.url },
@@ -33,7 +34,7 @@ const structuredData = {
       inLanguage: "en",
       isPartOf: { "@id": `${site.url}#website` },
       featureList: [
-        "140 × 68 pixel nice!view peripheral artwork",
+        `${niceView.artwork.physical.width} × ${niceView.artwork.physical.height} pixel portrait nice!view artwork, automatically rotated for ZMK`,
         "PNG, JPEG, and WebP image conversion",
         "Threshold, Floyd–Steinberg, and Atkinson dithering",
         "LVGL 9 C image and ZMK customization ZIP export",
@@ -74,7 +75,7 @@ export default function Home() {
           </div>
           <ol
             aria-label="Workflow"
-            className="mb-1 flex items-center gap-3 font-mono text-[10px] text-muted-foreground sm:gap-5"
+            className="mb-1 flex flex-wrap items-center gap-3 font-mono text-[10px] text-muted-foreground sm:gap-5"
           >
             {["Upload", "Adjust", "Preview", "Export"].map((step, index) => (
               <li key={step} className="flex items-center gap-1.5">

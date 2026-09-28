@@ -17,9 +17,9 @@ import { Button } from "@/components/ui/button";
 import { useEditorStore } from "@/store/editor-store";
 import type { MonochromeBitmap } from "@/lib/image/bitmap";
 import type { ProcessingSettings } from "@/types/editor";
-import type { ExportTarget } from "@/lib/displays/types";
+import type { DisplayPreset, ExportTarget } from "@/lib/displays/types";
 import { sanitizeCIdentifier } from "@/lib/generators/c-identifier";
-import { generateLvglImage } from "@/lib/generators/lvgl-image";
+import { getLvglImageLayout } from "@/lib/generators/lvgl-image";
 import { generateNiceViewArtwork } from "@/lib/generators/nice-view-artwork";
 import { generateZip } from "@/lib/generators/zip-generator";
 import { downloadBlob } from "@/lib/generators/download";
@@ -47,12 +47,14 @@ const targets: { id: ExportTarget; label: string; description: string }[] = [
 export function ExportDialog({
   open,
   onOpenChange,
-  bitmap,
+  framebufferBitmap,
+  display,
   settings,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  bitmap: MonochromeBitmap;
+  framebufferBitmap: MonochromeBitmap;
+  display: DisplayPreset;
   settings: ProcessingSettings;
 }) {
   const name = useEditorStore((state) => state.artworkName);
@@ -62,6 +64,7 @@ export function ExportDialog({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const symbol = sanitizeCIdentifier(name);
+  const layout = getLvglImageLayout(display.artwork.framebuffer);
   const generated = useMemo(() => {
     if (!symbol)
       return {
@@ -70,9 +73,19 @@ export function ExportDialog({
         error: "Enter a name with at least one letter or number.",
       };
     try {
+      const files = generateNiceViewArtwork(
+        framebufferBitmap,
+        symbol,
+        target,
+        settings,
+      );
+      const code = Object.entries(files).find(
+        ([path]) => path === "art.c" || path.endsWith("/widgets/art.c"),
+      )?.[1];
+      if (!code) throw new Error("The export package is missing its artwork.");
       return {
-        code: generateLvglImage(bitmap, symbol),
-        files: generateNiceViewArtwork(bitmap, symbol, target, settings),
+        code,
+        files,
         error: "",
       };
     } catch (cause) {
@@ -85,7 +98,7 @@ export function ExportDialog({
             : "Could not generate artwork.",
       };
     }
-  }, [bitmap, symbol, target, settings]);
+  }, [framebufferBitmap, symbol, target, settings]);
 
   const perform = async (action: "copy" | "c" | "zip") => {
     setError("");
@@ -137,8 +150,12 @@ export function ExportDialog({
           Take your artwork with you.
         </DialogTitle>
         <DialogDescription className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          140×68 pixels. 1,232 bytes. Generated locally for ZMK’s LVGL 9
-          implementation.
+          Physical artwork: {display.artwork.physical.width}×
+          {display.artwork.physical.height}. Encoded artwork:{" "}
+          {display.artwork.framebuffer.width}×
+          {display.artwork.framebuffer.height}.{" "}
+          {layout.dataSize.toLocaleString("en-US")} bytes. Generated locally for
+          ZMK’s LVGL 9 implementation.
         </DialogDescription>
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
@@ -193,7 +210,14 @@ export function ExportDialog({
         </div>
         <div className="mt-5 overflow-hidden rounded-md border">
           <div className="flex items-center justify-between border-b bg-secondary px-3 py-2">
-            <span className="font-mono text-[11px]">art.c</span>
+            <div>
+              <p className="text-[10px] font-medium">
+                Generated ZMK/LVGL framebuffer output
+              </p>
+              <span className="font-mono text-[10px] text-muted-foreground">
+                art.c
+              </span>
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -206,7 +230,7 @@ export function ExportDialog({
           <pre
             className="max-h-64 overflow-auto bg-[#242724] p-4 font-mono text-[10px] leading-relaxed text-[#e0e6d6]"
             tabIndex={0}
-            aria-label="Generated C code"
+            aria-label="Generated ZMK/LVGL framebuffer output"
           >
             <code>
               {generated.code ||

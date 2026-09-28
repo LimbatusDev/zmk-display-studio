@@ -1,3 +1,4 @@
+import { niceView } from "../../displays/nice-view.ts";
 import { requireCIdentifier } from "../c-identifier.ts";
 
 /** Minimal adaptation of ZMK's MIT-licensed nice_view/widgets/peripheral_status.c. */
@@ -93,14 +94,14 @@ ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
-    lv_obj_set_size(widget->obj, 160, 68);
+    lv_obj_set_size(widget->obj, ${niceView.framebuffer.width}, ${niceView.framebuffer.height});
     lv_obj_t *top = lv_canvas_create(widget->obj);
     lv_obj_align(top, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_canvas_set_buffer(top, widget->cbuf, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
 
     lv_obj_t *art = lv_image_create(widget->obj);
     lv_image_set_src(art, &${symbol});
-    lv_obj_align(art, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_align(art, LV_ALIGN_TOP_LEFT, ${niceView.artwork.framebuffer.x}, ${niceView.artwork.framebuffer.y});
 
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();

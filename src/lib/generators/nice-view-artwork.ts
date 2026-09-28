@@ -9,16 +9,17 @@ import { peripheralStatusTemplate } from "./templates/peripheral-status.ts";
 import { generateReadme } from "./templates/readme.ts";
 import { upstreamLicense } from "./templates/license.ts";
 
+/** Accepts artwork already converted to ZMK framebuffer coordinates. */
 export function generateNiceViewArtwork(
   bitmap: MonochromeBitmap,
   artworkName: string,
   target: ExportTarget,
   settings: ProcessingSettings,
 ): Record<string, string> {
-  const area = niceView.artworkAreas[0];
+  const area = niceView.artwork.framebuffer;
   if (bitmap.width !== area.width || bitmap.height !== area.height)
     throw new Error(
-      "nice!view peripheral artwork must be exactly 140×68 pixels.",
+      `nice!view peripheral framebuffer artwork must be exactly ${area.width}×${area.height} pixels.`,
     );
   if (!niceView.exportTargets.includes(target))
     throw new Error("Unsupported export target.");

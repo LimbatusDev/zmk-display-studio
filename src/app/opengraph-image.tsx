@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/lib/site";
+import { niceView } from "@/lib/displays/nice-view";
 
 export const alt =
   "ZMK Display Studio — custom nice!view artwork, from image to firmware";
@@ -7,6 +8,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default function OpenGraphImage() {
+  const { physical, artwork, statusArea } = niceView;
   return new ImageResponse(
     <div
       style={{
@@ -67,7 +69,7 @@ export default function OpenGraphImage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 20,
+            gap: 14,
           }}
         >
           <div
@@ -79,24 +81,57 @@ export default function OpenGraphImage() {
               background: "#282b27",
             }}
           >
-            <svg width="400" height="170" viewBox="0 0 160 68">
-              <rect width="160" height="68" fill="#dce3c3" />
-              <path
-                fill="#282b27"
-                d="M0 60h8v-8h8v-8h8v-8h8v-8h8v8h8v8h8v8h8v8h8v8H0zM52 68V56h8V44h8V32h8V20h8V8h8v12h8v12h8v12h8v12h8v12z"
+            <svg
+              width={(320 * physical.width) / physical.height}
+              height="320"
+              viewBox={`0 0 ${physical.width} ${physical.height}`}
+            >
+              <rect
+                width={physical.width}
+                height={physical.height}
+                fill="#dce3c3"
               />
-              <path fill="#282b27" d="M16 10h12v12H16z" />
+              <svg
+                x={statusArea.physical.x}
+                y={statusArea.physical.y}
+                width={statusArea.physical.width}
+                height={statusArea.physical.height}
+                viewBox="0 0 100 30"
+              >
+                <path
+                  stroke="#282b27"
+                  strokeWidth="2"
+                  d="M8 8h24v13H8zM32 12h4v5h-4M78 5l12 10-12 10V5l12 20M90 5L78 15"
+                  fill="none"
+                />
+                <path
+                  fill="#282b27"
+                  d="M11 11h15v7H11zM44 10h6v10h-6zM56 10h6v10h-6z"
+                />
+              </svg>
               <path
                 stroke="#282b27"
-                strokeWidth="1"
-                d="M140 0v68M145 10h10v8h-10zM155 12h2v4h-2M145 55h10M145 59h6"
-                fill="none"
+                d={`M0 ${artwork.physical.y}h${physical.width}`}
               />
-              <path fill="#282b27" d="M147 12h6v4h-6zM148 28h4v4h-4z" />
+              <svg
+                x={artwork.physical.x}
+                y={artwork.physical.y}
+                width={artwork.physical.width}
+                height={artwork.physical.height}
+                viewBox="0 0 100 200"
+                preserveAspectRatio="none"
+              >
+                <circle cx="73" cy="35" r="12" fill="#f7f7f2" />
+                <path fill="#282b27" d="M0 130L40 65l35 65 25-25v95H0z" />
+                <path fill="#f7f7f2" d="M40 65l12 35-12-10-10 13-5-14z" />
+                <path fill="#829071" d="M0 165l25-30 25 30 25-40 25 30v45H0z" />
+                <path fill="#282b27" d="M0 185l20-10 35 15 25-20 20 10v20H0z" />
+              </svg>
             </svg>
           </div>
           <span style={{ fontSize: 17, color: "#676b60", letterSpacing: 2 }}>
-            140 × 68 PIXELS. MAKE THEM YOURS.
+            {artwork.physical.width} × {artwork.physical.height} PHYSICAL
+            ARTWORK
           </span>
         </div>
       </div>

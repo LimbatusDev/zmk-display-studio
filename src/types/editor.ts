@@ -8,14 +8,14 @@ export interface SourceImage {
 }
 
 export interface ImageTransform {
-  /** Output pixels per source pixel; offsets are relative to artwork center. */
+  /** Physical artwork pixels per source pixel; offsets are relative to its center. */
   scale: number;
   offsetX: number;
   offsetY: number;
 }
 
 export type ProcessingMode = "threshold" | "floyd-steinberg" | "atkinson";
-export type PreviewMode = "device" | "pixels" | "source";
+export type PreviewMode = "physical" | "pixels" | "framebuffer" | "source";
 
 export interface ProcessingSettings {
   processingMode: ProcessingMode;

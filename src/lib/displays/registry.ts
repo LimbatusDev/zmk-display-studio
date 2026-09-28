@@ -1,5 +1,5 @@
 import { niceView } from "./nice-view.ts";
-import type { DisplayPreset } from "./types.ts";
+import type { DisplayPreset, DisplayRegion } from "./types.ts";
 
 export const displays: readonly DisplayPreset[] = [niceView];
 
@@ -9,10 +9,12 @@ export function getDisplay(id: string): DisplayPreset {
   return display;
 }
 
-export function getArtworkArea(displayId: string, areaId: string) {
-  const area = getDisplay(displayId).artworkAreas.find(
-    (item) => item.id === areaId,
-  );
-  if (!area) throw new Error(`Unsupported artwork area: ${areaId}`);
+export function getArtworkArea(
+  displayId: string,
+  areaId: string,
+): DisplayRegion {
+  const area = getDisplay(displayId).artwork;
+  if (area.id !== areaId)
+    throw new Error(`Unsupported artwork area: ${areaId}`);
   return area;
 }

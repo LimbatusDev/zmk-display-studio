@@ -1,7 +1,12 @@
 "use client";
 
 import { create } from "zustand";
-import { z } from "zod";
+import {
+  legacyPreferencesKey,
+  parsePreferences,
+  preferencesKey,
+  preferencesSchema,
+} from "@/lib/editor-preferences";
 import { getArtworkArea, getDisplay } from "@/lib/displays/registry";
 import { niceView } from "@/lib/displays/nice-view";
 import { releaseImage } from "@/lib/image/image-loader";
@@ -44,10 +49,10 @@ interface EditorState extends ProcessingSettings {
 export const useEditorStore = create<EditorState>((set, get) => ({
   ...processingDefaults,
   displayId: niceView.id,
-  artworkAreaId: niceView.artworkAreas[0].id,
+  artworkAreaId: niceView.artwork.id,
   sourceImage: null,
   transform: { scale: 1, offsetX: 0, offsetY: 0 },
-  previewMode: "device",
+  previewMode: "physical",
   showPixelGrid: false,
   artworkName: "custom_art",
   setSourceImage: (sourceImage) => {
@@ -58,19 +63,21 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       transform: sourceImage
         ? fitTransform(
             sourceImage,
-            getArtworkArea(state.displayId, state.artworkAreaId),
+            getArtworkArea(state.displayId, state.artworkAreaId).physical,
             "fill",
           )
         : { scale: 1, offsetX: 0, offsetY: 0 },
     });
   },
   setDisplay: (displayId) => {
-    const area = getDisplay(displayId).artworkAreas[0];
+    const area = getDisplay(displayId).artwork;
     const source = get().sourceImage;
     set({
       displayId,
       artworkAreaId: area.id,
-      ...(source ? { transform: fitTransform(source, area, "fill") } : {}),
+      ...(source
+        ? { transform: fitTransform(source, area.physical, "fill") }
+        : {}),
     });
   },
   setTransform: (change) => {
@@ -78,7 +85,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!state.sourceImage) return;
     const bounds = zoomBounds(
       state.sourceImage,
-      getArtworkArea(state.displayId, state.artworkAreaId),
+      getArtworkArea(state.displayId, state.artworkAreaId).physical,
     );
     const transform = { ...state.transform, ...change };
     if (!Object.values(transform).every(Number.isFinite)) return;
@@ -94,7 +101,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       set({
         transform: fitTransform(
           state.sourceImage,
-          getArtworkArea(state.displayId, state.artworkAreaId),
+          getArtworkArea(state.displayId, state.artworkAreaId).physical,
           mode,
         ),
       });
@@ -110,24 +117,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setArtworkName: (artworkName) => set({ artworkName }),
 }));
 
-const preferencesSchema = z.object({
-  processingMode: z.enum(["threshold", "floyd-steinberg", "atkinson"]),
-  threshold: z.number().int().min(0).max(255),
-  brightness: z.number().min(-100).max(100),
-  contrast: z.number().min(-100).max(100),
-  inverted: z.boolean(),
-  previewMode: z.enum(["device", "pixels", "source"]),
-  showPixelGrid: z.boolean(),
-});
-
 /** Called after hydration. Neither images nor transforms enter localStorage. */
 export function connectPreferences() {
-  const key = "zmk-display-studio:preferences:v1";
   try {
-    const raw = localStorage.getItem(key);
+    const raw =
+      localStorage.getItem(preferencesKey) ??
+      localStorage.getItem(legacyPreferencesKey);
     if (raw) {
-      const result = preferencesSchema.safeParse(JSON.parse(raw));
-      if (result.success) useEditorStore.setState(result.data);
+      const preferences = parsePreferences(raw);
+      if (preferences) useEditorStore.setState(preferences);
     }
   } catch {
     /* Storage is optional, including in private browsing. */
@@ -140,7 +138,7 @@ export function connectPreferences() {
     if (next === previous) return;
     previous = next;
     try {
-      localStorage.setItem(key, next);
+      localStorage.setItem(preferencesKey, next);
     } catch {
       /* Editing still works without persistence. */
     }

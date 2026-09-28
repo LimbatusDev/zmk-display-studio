@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { getArtworkArea } from "@/lib/displays/registry";
+import { getArtworkArea, getDisplay } from "@/lib/displays/registry";
 import { drawTransformedSource } from "@/lib/image/resize";
-import { processImage } from "@/lib/image/pipeline";
+import { processArtwork } from "@/lib/image/pipeline";
 import { useEditorStore } from "@/store/editor-store";
 
 export function useImagePipeline() {
@@ -24,19 +24,21 @@ export function useImagePipeline() {
     })),
   );
   const area = getArtworkArea(displayId, artworkAreaId);
+  const display = getDisplay(displayId);
+  const physical = area.physical;
   const source = useMemo(() => {
     if (!sourceImage || typeof document === "undefined")
       return { rgba: null, error: null };
     try {
       const canvas = document.createElement("canvas");
-      canvas.width = area.width;
-      canvas.height = area.height;
+      canvas.width = physical.width;
+      canvas.height = physical.height;
       const context = canvas.getContext("2d", { willReadFrequently: true });
       if (!context)
         throw new Error("Your browser could not create a 2D canvas.");
-      drawTransformedSource(context, sourceImage.element, area, transform);
+      drawTransformedSource(context, sourceImage.element, physical, transform);
       return {
-        rgba: context.getImageData(0, 0, area.width, area.height).data,
+        rgba: context.getImageData(0, 0, physical.width, physical.height).data,
         error: null,
       };
     } catch (error) {
@@ -48,13 +50,17 @@ export function useImagePipeline() {
             : "Could not process the image.",
       };
     }
-  }, [sourceImage, area, transform]);
-  const bitmap = useMemo(
-    () =>
-      source.rgba
-        ? processImage(source.rgba, area.width, area.height, settings)
-        : null,
-    [source.rgba, area, settings],
+  }, [sourceImage, physical, transform]);
+  const processed = useMemo(
+    () => (source.rgba ? processArtwork(source.rgba, display, settings) : null),
+    [source.rgba, display, settings],
   );
-  return { area, rgba: source.rgba, bitmap, error: source.error, settings };
+  return {
+    area,
+    sourceRgba: source.rgba,
+    physicalBitmap: processed?.physicalBitmap ?? null,
+    framebufferBitmap: processed?.framebufferBitmap ?? null,
+    error: source.error,
+    settings,
+  };
 }

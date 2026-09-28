@@ -65,10 +65,10 @@ export function DisplayEditor() {
         </div>
       </div>
       <div className="editor-columns">
-        <aside aria-label="Source image" className="source-panel">
+        <aside aria-label="Image editor" className="source-panel">
           <div className="panel-heading">
             <span>
-              <span className="section-number">01</span> Source image
+              <span className="section-number">01</span> Image editor
             </span>
           </div>
           <div className="space-y-6 p-5">
@@ -78,6 +78,8 @@ export function DisplayEditor() {
               clear={clear}
               busy={busy}
               error={error}
+              sourceRgba={pipeline.sourceRgba}
+              physicalSize={pipeline.area.physical}
             />
             <div className="border-t pt-5">
               <EditorToolbar />
@@ -85,8 +87,8 @@ export function DisplayEditor() {
           </div>
         </aside>
         <section aria-label="Display preview" className="preview-panel">
-          <div className="panel-heading gap-3">
-            <span className="hidden xl:inline">
+          <div className="panel-heading flex-wrap gap-3">
+            <span className="hidden 2xl:inline">
               <span className="section-number">02</span> Preview
             </span>
             <PreviewTabs />
@@ -96,11 +98,13 @@ export function DisplayEditor() {
               <p className="m-5 text-sm text-destructive" role="alert">
                 {pipeline.error}
               </p>
-            ) : pipeline.bitmap && pipeline.rgba ? (
+            ) : pipeline.physicalBitmap &&
+              pipeline.framebufferBitmap &&
+              pipeline.sourceRgba ? (
               <DisplayPreview
-                bitmap={pipeline.bitmap}
-                source={pipeline.rgba}
-                area={pipeline.area}
+                physicalBitmap={pipeline.physicalBitmap}
+                framebufferBitmap={pipeline.framebufferBitmap}
+                source={pipeline.sourceRgba}
               />
             ) : (
               <EmptyState choose={choose} sample={sample} busy={busy} />
@@ -108,9 +112,19 @@ export function DisplayEditor() {
           </div>
           <div className="flex min-h-11 items-center justify-between gap-2 border-t bg-card px-4 py-2 font-mono text-[9px] text-muted-foreground">
             <span>
-              {pipeline.area.width} × {pipeline.area.height} px{" "}
-              <span className="mx-1">·</span>{" "}
-              {pipeline.area.width * pipeline.area.height} pixels
+              {mode === "framebuffer" ? "Framebuffer" : "Artwork"}{" "}
+              {
+                pipeline.area[
+                  mode === "framebuffer" ? "framebuffer" : "physical"
+                ].width
+              }{" "}
+              ×{" "}
+              {
+                pipeline.area[
+                  mode === "framebuffer" ? "framebuffer" : "physical"
+                ].height
+              }{" "}
+              px
             </span>
             <label
               className={`flex items-center gap-1.5 ${mode !== "pixels" ? "opacity-40" : "cursor-pointer"}`}
@@ -148,14 +162,14 @@ export function DisplayEditor() {
         <div>
           <p className="text-xs font-medium">From pixels to firmware.</p>
           <p className="mt-1 text-[10px] text-muted-foreground">
-            {pipeline.bitmap
+            {pipeline.physicalBitmap
               ? "Your artwork is ready. Preview the code before downloading."
               : "Start with an image. Leave with something that’s yours."}
           </p>
         </div>
         <Button
           className="h-10 min-w-32 gap-2 px-5"
-          disabled={!pipeline.bitmap || busy}
+          disabled={!pipeline.framebufferBitmap || busy}
           onClick={() => setExportOpen(true)}
         >
           <Download /> Export{" "}
@@ -164,11 +178,12 @@ export function DisplayEditor() {
           </span>
         </Button>
       </div>
-      {pipeline.bitmap && exportOpen && (
+      {pipeline.framebufferBitmap && exportOpen && (
         <ExportDialog
           open={exportOpen}
           onOpenChange={setExportOpen}
-          bitmap={pipeline.bitmap}
+          framebufferBitmap={pipeline.framebufferBitmap}
+          display={display}
           settings={pipeline.settings}
         />
       )}

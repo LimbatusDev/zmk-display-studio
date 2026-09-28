@@ -28,19 +28,29 @@ export function SettingsPanel() {
           ))}
         </select>
         <dl className="grid grid-cols-2 gap-y-2 text-[11px]">
-          <dt className="text-muted-foreground">Display resolution</dt>
+          <dt className="text-muted-foreground">Physical display</dt>
           <dd className="text-right font-mono">
-            {display.width} × {display.height}
+            {display.physical.width} × {display.physical.height}
           </dd>
           <dt className="text-muted-foreground">Artwork area</dt>
           <dd className="text-right font-mono">
-            {area.width} × {area.height}
+            {area.physical.width} × {area.physical.height}
           </dd>
           <dt className="text-muted-foreground">Color depth</dt>
           <dd className="text-right font-mono">
             {display.colorDepth}-bit / monochrome
           </dd>
         </dl>
+        <details className="text-[10px] text-muted-foreground">
+          <summary className="cursor-pointer">
+            ZMK framebuffer dimensions
+          </summary>
+          <p className="mt-2 font-mono">
+            Display: {display.framebuffer.width} × {display.framebuffer.height}
+            <br />
+            Artwork: {area.framebuffer.width} × {area.framebuffer.height}
+          </p>
+        </details>
       </section>
       <section className="space-y-5 p-5">
         <fieldset>

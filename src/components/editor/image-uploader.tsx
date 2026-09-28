@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   FileImage,
   ImagePlus,
@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEditorStore } from "@/store/editor-store";
+import type { Size } from "@/lib/displays/types";
+import { ArtworkViewport } from "./artwork-viewport";
 
 interface ImageUploaderProps {
   choose: () => void;
@@ -16,6 +18,8 @@ interface ImageUploaderProps {
   clear: () => void;
   busy: boolean;
   error: string | null;
+  sourceRgba: Uint8ClampedArray | null;
+  physicalSize: Size;
 }
 
 export function ImageUploader({
@@ -24,25 +28,12 @@ export function ImageUploader({
   clear,
   busy,
   error,
+  sourceRgba,
+  physicalSize,
 }: ImageUploaderProps) {
   const source = useEditorStore((state) => state.sourceImage);
-  const canvas = useRef<HTMLCanvasElement>(null);
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0);
-  useEffect(() => {
-    if (!source || !canvas.current) return;
-    const context = canvas.current.getContext("2d");
-    if (!context) return;
-    context.clearRect(0, 0, 360, 224);
-    const scale = Math.min(360 / source.width, 224 / source.height);
-    context.drawImage(
-      source.element,
-      (360 - source.width * scale) / 2,
-      (224 - source.height * scale) / 2,
-      source.width * scale,
-      source.height * scale,
-    );
-  }, [source]);
   return (
     <div className="space-y-3">
       <div
@@ -71,14 +62,32 @@ export function ImageUploader({
       >
         {source ? (
           <>
-            <canvas
-              ref={canvas}
-              width={360}
-              height={224}
-              className="source-thumbnail"
-              aria-label={`Original image: ${source.name}`}
-              role="img"
-            />
+            <div className="px-3 pt-4 pb-3">
+              {sourceRgba && (
+                <div
+                  className="mx-auto max-w-full overflow-hidden rounded-sm border"
+                  style={{ width: physicalSize.width * 2 }}
+                >
+                  <ArtworkViewport
+                    rgba={sourceRgba}
+                    width={physicalSize.width}
+                    height={physicalSize.height}
+                    label={`Physical source crop: ${physicalSize.width} by ${physicalSize.height} pixels`}
+                    pixelated={false}
+                    descriptionId="crop-help"
+                  />
+                </div>
+              )}
+              <p className="mt-3 text-center font-mono text-[9px] text-muted-foreground">
+                {physicalSize.width} × {physicalSize.height} physical crop
+              </p>
+              <p
+                id="crop-help"
+                className="mt-1 text-center text-[9px] text-muted-foreground"
+              >
+                Drag to position · Arrow keys to nudge
+              </p>
+            </div>
             <div className="flex gap-2 border-t p-2">
               <Button
                 className="flex-1"
@@ -136,7 +145,7 @@ export function ImageUploader({
               {source.name}
             </p>
             <p className="mt-1 font-mono text-[10px] text-muted-foreground">
-              {source.width} × {source.height} ·{" "}
+              Original: {source.width} × {source.height} ·{" "}
               {(source.size / 1024).toFixed(0)} KB
             </p>
           </div>
