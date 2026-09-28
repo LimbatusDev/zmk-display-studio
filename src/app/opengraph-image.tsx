@@ -85,7 +85,6 @@ export default function OpenGraphImage() {
                 fill="#282b27"
                 d="M0 60h8v-8h8v-8h8v-8h8v-8h8v8h8v8h8v8h8v8h8v8H0zM52 68V56h8V44h8V32h8V20h8V8h8v12h8v12h8v12h8v12h8v12z"
               />
-              <path fill="#dce3c3" d="M76 32V20h8v-4h8v4h8v12h-8v-6h-8v6z" />
               <path fill="#282b27" d="M16 10h12v12H16z" />
               <path
                 stroke="#282b27"
