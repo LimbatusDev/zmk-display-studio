@@ -1,0 +1,114 @@
+import type { ExportTarget } from "../../displays/types.ts";
+import {
+  processingLabels,
+  type ProcessingSettings,
+} from "../../../types/editor.ts";
+import { niceViewGenerator } from "../metadata.ts";
+
+const installations: Record<ExportTarget, (symbol: string) => string> = {
+  "c-image": (
+    symbol,
+  ) => `This is an image asset, not a complete ZMK display widget.
+
+1. Add art.c to your existing custom display/shield source directory.
+2. Compile it exactly once in that shield's CMakeLists.txt with \`zephyr_library_sources(art.c)\`.
+3. In your LVGL 9 widget, declare \`LV_IMAGE_DECLARE(${symbol});\` at file scope.
+4. Set your image source with \`lv_image_set_src(image_object, &${symbol});\`.
+
+Do not replace the stock nice_view/widgets/art.c with this file alone: the stock
+widget references balloon and mountain. Use the nice!view customization export
+to replace that widget too.`,
+  "nice-view-artwork":
+    () => `This package replaces two source files in a ZMK checkout or your ZMK fork.
+It does not install by placing art.c in an ordinary config folder.
+
+1. Use a ZMK checkout based on the revision listed below.
+2. Copy the package's app/ directory into that checkout, replacing:
+   - app/boards/shields/nice_view/widgets/art.c
+   - app/boards/shields/nice_view/widgets/peripheral_status.c
+3. Keep your existing nice_view and, if required, nice_view_adapter shields.
+4. Ensure CONFIG_ZMK_DISPLAY=y and CONFIG_NICE_VIEW_WIDGET_STATUS=y.
+5. Perform a pristine rebuild and flash your peripheral half.
+
+For GitHub Actions builds, commit these changes to a ZMK fork, point your config's
+west manifest ZMK project to that fork and commit, and rebuild. Files in an
+unrelated config directory will not override upstream C sources.
+
+The image is deterministic; the battery and connection status retain upstream behavior.
+Central-side artwork is not changed.`,
+  "custom-shield":
+    () => `Experimental: a custom shield that reuses support sources from the inspected ZMK tree.
+
+1. Copy boards/shields/nice_view_custom/ into the boards/shields/ directory of
+   your unified ZMK config/module repository (beside its config/ directory).
+2. Ensure the repository's zephyr/module.yml contains:
+
+   build:
+     settings:
+       board_root: .
+
+   A module.yml is included for a NEW standalone module. If yours already exists,
+   merge the board_root setting; do not overwrite your module configuration.
+3. Replace nice_view with nice_view_custom in the peripheral entry of build.yaml.
+   Keep the keyboard shield and any nice_view_adapter entry. For example:
+
+   shield: corne_right nice_view_adapter nice_view_custom
+
+4. The keyboard/adapter must provide &nice_view_spi with MOSI, SCK and CS pins.
+5. Keep CONFIG_NICE_VIEW_WIDGET_STATUS=y, perform a pristine build and flash.
+
+For a local standalone module, pass its absolute root with
+\`-DZMK_EXTRA_MODULES=/absolute/path/to/zmk-display-studio-export\` after the
+\`--\` in your normal west build command. Select nice_view_custom in SHIELD.
+
+Legacy config-only repositories can instead put boards/ inside their config/
+directory, which ZMK registers as a board root via ZMK_CONFIG.
+
+Do not select nice_view and nice_view_custom together. The central side may keep
+nice_view; when using nice_view_custom there, it reuses the stock central widget.
+This is not a self-contained fork of ZMK: CMake uses the upstream nice_view
+support files. Review compatibility when updating ZMK.`,
+};
+
+export function generateReadme(
+  target: ExportTarget,
+  symbol: string,
+  settings: ProcessingSettings,
+) {
+  return `# ZMK Display Studio Export
+
+Display: nice!view (160×68)
+Artwork: 140×68
+Generator: ${niceViewGenerator.id} v${niceViewGenerator.version}
+Symbol: ${symbol}
+Processing: ${processingLabels[settings.processingMode]}
+Threshold: ${settings.processingMode === "threshold" ? settings.threshold : "Not used for dithering"}
+Brightness: ${settings.brightness}
+Contrast: ${settings.contrast}
+Inverted: ${settings.inverted ? "Yes" : "No"}
+
+## Installation
+
+${installations[target](symbol)}
+
+## Encoding and compatibility
+
+- Target: ZMK main at ${niceViewGenerator.zmkRevision}.
+- LVGL revision: ${niceViewGenerator.lvglRevision} (9.3.0-dev).
+- Format: LV_COLOR_FORMAT_I1, opaque black/white BGRA palette (8 bytes).
+- Row stride: 18 bytes, MSB-first, 4 zero padding bits per row.
+- Data size: 1232 bytes. Status UI is NOT part of the artwork.
+- The preview's inversion is baked into the pixels. The artwork palette is fixed;
+  CONFIG_NICE_VIEW_WIDGET_INVERTED can invert the status UI but not this image.
+- Transparent pixels and uncovered crop space are composited onto white before adjustments.
+- This export does not target the older LVGL 8 APIs in earlier ZMK releases.
+- Source compatibility was checked against the revision above. A complete firmware
+  build and physical-device validation are still required for your keyboard.
+
+## Generated by
+
+ZMK Display Studio. Image processing and ZIP generation happened locally in your browser.
+Independent community tooling; not affiliated with ZMK or nice!keyboards.
+Derived ZMK source files retain their MIT copyright notices. Your artwork remains yours.
+`;
+}
