@@ -27,7 +27,10 @@ export function ThemeSelector() {
       value={mounted && resolvedTheme ? [resolvedTheme] : []}
       disabled={!mounted}
       onValueChange={(values) => {
-        const selected = choices.find(({ theme }) => theme === values[0]);
+        // Selecting the active system theme should still save a preference.
+        const selected = choices.find(
+          ({ theme }) => theme === (values[0] ?? resolvedTheme),
+        );
         if (selected) setTheme(selected.theme);
       }}
       spacing={0.5}
