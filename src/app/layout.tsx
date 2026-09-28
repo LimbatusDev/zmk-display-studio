@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { site } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,9 +14,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZMK Display Studio — Make it yours",
-  description:
-    "Create custom nice!view artwork for your ZMK keyboard. Adjust, preview, and export LVGL assets entirely in your browser.",
+  metadataBase: new URL(site.url),
+  applicationName: site.name,
+  title: {
+    default: site.title,
+    template: `%s | ${site.name}`,
+  },
+  description: site.description,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: site.url,
+    siteName: site.name,
+    title: site.title,
+    description: site.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.title,
+    description: site.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

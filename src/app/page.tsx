@@ -1,10 +1,57 @@
+import type { Metadata } from "next";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppFooter } from "@/components/layout/app-footer";
+import { EditorGuide } from "@/components/layout/editor-guide";
 import { DisplayEditor } from "@/components/editor/display-editor";
+import { site } from "@/lib/site";
+
+export const metadata: Metadata = {
+  alternates: { canonical: site.url },
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${site.url}#website`,
+      url: site.url,
+      name: site.name,
+      description: site.description,
+      inLanguage: "en",
+    },
+    {
+      "@type": "WebApplication",
+      "@id": `${site.url}#application`,
+      url: site.url,
+      name: site.name,
+      description: site.description,
+      applicationCategory: "DesignApplication",
+      operatingSystem: "Any",
+      browserRequirements: "Requires JavaScript and a modern web browser.",
+      isAccessibleForFree: true,
+      inLanguage: "en",
+      isPartOf: { "@id": `${site.url}#website` },
+      featureList: [
+        "140 × 68 pixel nice!view peripheral artwork",
+        "PNG, JPEG, and WebP image conversion",
+        "Threshold, Floyd–Steinberg, and Atkinson dithering",
+        "LVGL 9 C image and ZMK customization ZIP export",
+        "Local image processing with no uploads",
+      ],
+    },
+  ],
+};
 
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
       <AppHeader />
       <main
         id="main-content"
@@ -16,10 +63,13 @@ export default function Home() {
               A little canvas. A lot of character.
             </p>
             <h1 className="text-3xl font-medium tracking-[-0.045em] sm:text-4xl">
-              Make it <span className="text-primary">yours.</span>
+              Custom artwork for your{" "}
+              <span className="text-primary">nice!view.</span>
             </h1>
-            <p className="mt-2.5 text-sm text-muted-foreground">
-              Design custom artwork for your ZMK keyboard display.
+            <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Turn an image into monochrome artwork for your ZMK keyboard.
+              Adjust, preview, and export LVGL assets for free, right in your
+              browser.
             </p>
           </div>
           <ol
@@ -40,6 +90,7 @@ export default function Home() {
           </ol>
         </div>
         <DisplayEditor />
+        <EditorGuide />
       </main>
       <AppFooter />
     </>

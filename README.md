@@ -2,6 +2,8 @@
 
 A local-first artwork editor for ZMK keyboard displays. Upload an image, compose a crop, preview monochrome pixels, and export LVGL/ZMK assets. The first display is **nice!view**: a **160×68 display** with a **140×68 peripheral artwork area** and a separate **20×68 status area**.
 
+Use the editor at **https://zmk-display-studio.limbatus.com/**.
+
 ## Development
 
 Use Node.js 24+ and the pnpm version in `package.json`.
@@ -29,6 +31,12 @@ LVGL_DIR=/absolute/path/to/lvgl pnpm test:coverage
 ```
 
 This optional check requires `clang`. It checks the image descriptor and arrays, not a full Zephyr firmware build.
+
+## Search and sharing
+
+`src/lib/site.ts` defines the production URL, title, and description shared by page metadata, structured data, and crawler routes. The homepage has a production canonical URL, WebSite/WebApplication JSON-LD, and server-rendered usage guidance. `src/app/opengraph-image.tsx` generates the social preview at build time for Open Graph and Twitter cards.
+
+After deploying, verify `/robots.txt`, `/sitemap.xml`, and `/opengraph-image` on the production domain. Add the site to Google Search Console and Bing Webmaster Tools, submit `https://zmk-display-studio.limbatus.com/sitemap.xml`, and request indexing of the homepage. Domain verification is configured through the respective service (for example, a DNS TXT record).
 
 ## Using the editor
 
