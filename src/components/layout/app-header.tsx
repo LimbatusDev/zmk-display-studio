@@ -37,7 +37,7 @@ export function AppHeader() {
               Display Studio
             </span>
           </span>
-          <span className="hidden rounded border px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground sm:block">
+          <span className="hidden rounded-full border border-primary/15 bg-highlight px-1.5 py-0.5 font-mono text-[9px] text-primary sm:block">
             BETA
           </span>
         </Link>
@@ -46,15 +46,15 @@ export function AppHeader() {
           className="flex items-center gap-2 sm:gap-5"
         >
           <span className="hidden items-center gap-1.5 text-[11px] text-muted-foreground md:flex">
-            <span className="size-1.5 rounded-full bg-emerald-600" />{" "}
-            Browser-based. Private by design.
+            <span className="size-1.5 rounded-full bg-signal" /> Browser-based.
+            Private by design.
           </span>
           <Dialog>
             <DialogTrigger render={<Button variant="ghost" size="sm" />}>
               About
             </DialogTrigger>
             <DialogContent>
-              <Cpu className="mb-5 size-8 text-primary" />
+              <Cpu className="mb-5 size-8 rounded-full bg-highlight p-1 text-primary" />
               <DialogTitle className="text-xl font-semibold">
                 Small display. Your expression.
               </DialogTitle>
@@ -65,7 +65,7 @@ export function AppHeader() {
               </DialogDescription>
               <div className="mt-5 space-y-4 text-sm leading-relaxed">
                 <p className="flex gap-2">
-                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" />{" "}
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" />{" "}
                   Images are processed locally in your browser and are never
                   uploaded.
                 </p>

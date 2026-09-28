@@ -228,7 +228,7 @@ export function ExportDialog({
             </Button>
           </div>
           <pre
-            className="max-h-64 overflow-auto bg-[#242724] p-4 font-mono text-[10px] leading-relaxed text-[#e0e6d6]"
+            className="code-preview max-h-64 overflow-auto bg-code-surface p-4 font-mono text-[10px] leading-relaxed text-code-foreground"
             tabIndex={0}
             aria-label="Generated ZMK/LVGL framebuffer output"
           >
@@ -263,7 +263,7 @@ export function ExportDialog({
         )}
         <p
           role="status"
-          className="mt-3 flex min-h-4 items-center gap-1.5 text-xs text-emerald-700"
+          className="mt-3 flex min-h-4 items-center gap-1.5 text-xs text-success"
         >
           {message && (
             <>

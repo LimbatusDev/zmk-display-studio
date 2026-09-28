@@ -102,7 +102,9 @@ function PixelGrid({
     const context = canvas.current?.getContext("2d");
     if (!context) return;
     context.clearRect(0, 0, width * scale, height * scale);
-    context.strokeStyle = "rgba(100, 125, 140, .32)";
+    context.strokeStyle = getComputedStyle(context.canvas)
+      .getPropertyValue("--pixel-grid-color")
+      .trim();
     context.lineWidth = 1;
     context.beginPath();
     for (let x = 1; x < width; x++) {
@@ -207,7 +209,7 @@ export function DisplayPreview({
   return (
     <div className="flex flex-1 flex-col items-center justify-center py-6">
       <div className="flex items-center gap-2 font-mono text-[9px] tracking-widest text-muted-foreground uppercase">
-        <span className="size-1.5 rounded-full bg-emerald-600" />
+        <span className="size-1.5 rounded-full bg-signal" />
         {description.badge}
       </div>
       <div ref={stage} className="preview-stage">
@@ -243,14 +245,14 @@ export function DisplayPreview({
                 {artwork}
               </div>
             </div>
-            <div className="mt-3 flex justify-between font-mono text-[8px] tracking-widest text-zinc-400">
+            <div className="mt-3 flex justify-between font-mono text-[8px] tracking-widest text-device-foreground">
               <span>{display.name}</span>
               <span>{display.colorDepth}-BIT</span>
             </div>
           </div>
         ) : mode === "framebuffer" ? (
           <div
-            className="box-content border border-zinc-400 shadow-sm"
+            className="box-content border border-input shadow-sm"
             style={{ width: framebufferBitmap.width * scale }}
           >
             <ImageCanvas
@@ -262,7 +264,7 @@ export function DisplayPreview({
           </div>
         ) : (
           <div
-            className="box-content border border-zinc-400 shadow-sm"
+            className="box-content border border-input shadow-sm"
             style={{ width: area.width * scale }}
           >
             {artwork}

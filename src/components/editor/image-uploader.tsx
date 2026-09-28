@@ -65,7 +65,7 @@ export function ImageUploader({
             <div className="px-3 pt-4 pb-3">
               {sourceRgba && (
                 <div
-                  className="mx-auto max-w-full overflow-hidden rounded-sm border"
+                  className="mx-auto max-w-full overflow-hidden border"
                   style={{ width: physicalSize.width * 2 }}
                 >
                   <ArtworkViewport
@@ -111,11 +111,11 @@ export function ImageUploader({
           </>
         ) : (
           <div className="flex min-h-52 flex-col items-center justify-center px-3 py-6 text-center">
-            <span className="mb-4 rounded-md border bg-background p-3">
+            <span className="mb-4 rounded-full border border-primary/15 bg-highlight p-3">
               {busy ? (
                 <LoaderCircle className="size-5 animate-spin text-primary" />
               ) : (
-                <ImagePlus className="size-5 text-muted-foreground" />
+                <ImagePlus className="size-5 text-primary" />
               )}
             </span>
             <p className="text-sm font-medium">
