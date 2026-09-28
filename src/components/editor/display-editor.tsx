@@ -161,7 +161,7 @@ export function DisplayEditor() {
           </span>
         </Button>
       </div>
-      {pipeline.bitmap && (
+      {pipeline.bitmap && exportOpen && (
         <ExportDialog
           open={exportOpen}
           onOpenChange={setExportOpen}

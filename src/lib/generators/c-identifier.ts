@@ -15,7 +15,12 @@ export function sanitizeCIdentifier(input: string) {
     .slice(0, 63);
   if (!name) return "";
   if (/^[0-9]/.test(name)) name = `_${name}`;
-  if (reserved.has(name) || /^(lv_|zmk_|sys_|u?int\d+_t$)/.test(name))
+  if (
+    reserved.has(name) ||
+    /^(lv_|zmk_(widget_|display_|split_|battery_|usb_|ble_)|sys_|u?int\d+_t$)/.test(
+      name,
+    )
+  )
     name = `custom_${name}`;
   return name;
 }

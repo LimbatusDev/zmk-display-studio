@@ -1,50 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ZMK Display Studio
 
-## Getting Started
+A local-first artwork editor for ZMK keyboard displays. Upload an image, compose a crop, preview monochrome pixels, and export LVGL/ZMK assets. The first display is **nice!view**: a **160×68 display** with a **140×68 peripheral artwork area** and a separate **20×68 status area**.
 
-First, run the development server:
+## Development
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
+Use Node.js 24+ and the pnpm version in `package.json`.
+
+```sh
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. Production: `pnpm build` followed by `pnpm start`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+pnpm test
+pnpm test:coverage
+pnpm typecheck
+pnpm lint:check
+pnpm format:check
+pnpm build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Tests use Node's built-in TypeScript support and test runner. No separate test framework is required. To also compile generated C against real LVGL headers, check out the LVGL revision below and run:
 
-## Code Quality
+```sh
+LVGL_DIR=/absolute/path/to/lvgl pnpm test:coverage
+```
 
-Run these commands with pnpm:
+This optional check requires `clang`. It checks the image descriptor and arrays, not a full Zephyr firmware build.
 
-| Command             | Description                                                                    |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `pnpm format`       | Format files with Prettier.                                                    |
-| `pnpm format:check` | Check formatting without changing files.                                       |
-| `pnpm lint`         | Run ESLint and apply available automatic fixes.                                |
-| `pnpm lint:check`   | Run ESLint without changing files.                                             |
-| `pnpm typecheck`    | Generate Next.js route types and check TypeScript without emitting JavaScript. |
+## Using the editor
 
-Both lint commands fail on warnings as well as errors.
+1. Choose a PNG, JPEG, or WebP (10 MB maximum), drag one onto the source area, or try the locally generated sample.
+2. Drag in any preview to pan. Focus the artwork and use arrow keys to nudge; Shift moves 10 pixels. Fit, fill, center, reset, and zoom controls are also available.
+3. Select threshold, Floyd–Steinberg, or Atkinson. Adjust brightness, contrast, and inversion.
+4. Inspect Device, Pixels, or Source. Pixels uses integer enlargement; its optional canvas grid appears at 3× and above.
+5. Export, name your artwork, inspect/copy the C, or download a C file / ZIP with installation instructions.
 
-## Learn More
+Transparent and uncovered pixels are composited onto white. The status region in Device mode is simulated and is never included in the exported artwork.
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+src/app/                       App Router shell, metadata, styles
+src/components/editor/         Upload, composition, settings, preview, export UI
+src/components/layout/         Header, About dialog, privacy footer
+src/components/ui/             shadcn/Base UI primitives
+src/store/editor-store.ts      Zustand state/actions and validated preferences
+src/types/editor.ts            Source, transform, and processing types
+src/lib/displays/              Display registry, artwork/status areas, export targets
+src/lib/image/                 Pure algorithms plus browser decoding/drawing
+src/lib/generators/            C identifiers, LVGL encoding, packages, downloads
+src/lib/generators/templates/  Isolated ZMK integration and installation templates
+tests/                        Algorithm, encoding, package, optional native C tests
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The display registry owns dimensions; UI and processing operate on the selected artwork area. Additional displays can supply their own areas and exporter implementation without changing the image pipeline. The MVP edits one artwork area and one source at a time.
 
-## Deploy on Vercel
+The source is retained separately from `{ scale, offsetX, offsetY }`. Scale means output pixels per source pixel; offsets are measured relative to artwork center. The same processed bitmap drives the preview and export. Source drawing is memoized separately from processing settings, and drag updates are coalesced with `requestAnimationFrame`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+source → transform/crop/resize → white compositing
+       → brightness → contrast → grayscale
+       → threshold / error diffusion → invert → 0/1 bitmap
+       → palette + row-padded I1 data → LVGL descriptor
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Privacy and persistence
+
+Images are decoded and processed with browser Canvas APIs. C files and ZIPs are generated locally with Blob APIs and JSZip. There are no upload endpoints, server actions, accounts, analytics, database, or image-processing services.
+
+Object URLs are revoked on replacement, clearing, failed/stale decoding, and editor unmount. Download URLs are released after use. localStorage holds only validated processing/preview preferences under `zmk-display-studio:preferences:v1`; source files, image data, names, and transforms are not persisted. Storage failures do not prevent editing.
+
+Loading the application requests its normal static assets. Image selection, processing, and export do not require network requests.
+
+## Firmware encoding
+
+Generator: `nice-view-zmk-main`, version `1`.
+
+- ZMK main inspected: [`5b51501fead672c41b5cfb396f3dafe0894bf4e9`](https://github.com/zmkfirmware/zmk/tree/5b51501fead672c41b5cfb396f3dafe0894bf4e9).
+- ZMK's pinned LVGL: [`f1db87ee98f1810328a8419572fa42a3b5f352ae`](https://github.com/zmkfirmware/lvgl/tree/f1db87ee98f1810328a8419572fa42a3b5f352ae), reporting 9.3.0-dev.
+- References: `app/boards/shields/nice_view/widgets/art.c`, `peripheral_status.c`, and LVGL's indexed-image decoder.
+- Internal pixels: `0 = black`, `1 = white`.
+- Export: `LV_COLOR_FORMAT_I1`, two opaque BGRA palette entries (8 bytes), MSB-first indices.
+- Every row is independently padded: `ceil(140 / 8) = 18` bytes, with 4 zero padding bits.
+- Total data: **8 + 18 × 68 = 1,232 bytes**.
+- Descriptor: `lv_image_dsc_t` with explicit magic, color format, width, height, and stride.
+
+The palette is fixed so exported artwork matches the preview. Editor inversion is baked into pixels; `CONFIG_NICE_VIEW_WIDGET_INVERTED` affects status-widget colors independently. No timestamp or random selection enters generated C. ZIP entries use stable ordering and timestamps.
+
+## Export choices
+
+**C image only:** `art.c` plus README in the ZIP. Compile it once in an existing custom widget/shield and reference the declared image. This file alone is not a replacement for the stock balloon/mountain widget.
+
+**nice!view customization:** replacements for `art.c` and `peripheral_status.c` under their upstream paths. Apply them to a local ZMK checkout or fork; the generated README explains local and manifest-based builds. The widget calls `lv_image_set_src(art, &your_symbol)` deterministically and retains battery/connection behavior.
+
+**Full custom shield (Experimental):** `boards/shields/nice_view_custom/` and module discovery metadata. Select `nice_view_custom` instead of `nice_view`, keeping the keyboard and any adapter shield. Its CMake integration reuses unchanged upstream utilities and central widgets. Merge module settings into existing configuration rather than overwriting them. Detailed instructions are included in every ZIP.
+
+## Limitations
+
+- PNG/JPEG/WebP only; SVG and animated artwork are not supported. Animated raster sources use the browser-decoded frame.
+- Source images are limited to 40 megapixels and 16,384 pixels per side, in addition to the 10 MB limit.
+- Artwork customization targets split peripheral displays. Central-side custom layouts and other displays are future work.
+- Physical display appearance can differ from the browser simulation. Browser image decoding/resampling can also differ slightly between engines.
+- Older LVGL 8-based ZMK releases are unsupported. Future ZMK changes may require a generator/template update.
+- A full Zephyr build and physical nice!view test have not been performed. The advanced custom shield remains experimental.
+- Clipboard access requires a secure context (HTTPS or localhost); direct downloads are available as an alternative.
+
+Independent community tooling; not affiliated with ZMK or nice!keyboards. ZMK-derived templates retain MIT attribution, and relevant exports include the upstream license.

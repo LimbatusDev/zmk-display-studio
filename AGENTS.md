@@ -8,7 +8,37 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-## Naming Conventions
+## Commands and verification
+
+- Use Node.js 24+ and pnpm (pinned in `package.json`). Run commands from the root; this is a single app despite `pnpm-workspace.yaml`. Start locally with `pnpm dev`.
+- `pnpm lint` **auto-fixes**; use `pnpm lint:check` for read-only verification. Both fail on warnings. Likewise, `pnpm format` writes files; `pnpm format:check` only checks.
+- Use `pnpm typecheck`, which runs `next typegen` before `tsc --noEmit`; the layout uses generated `LayoutProps`. Bare `tsc` can miss these types on a clean checkout.
+- Focused checks: `pnpm exec eslint <file> --max-warnings=0` and `pnpm exec prettier --check <file>`. Production compilation: `pnpm build`.
+- `pnpm-lock.yaml` contains multiple YAML documents: the first locks pnpm itself, the second app dependencies. Let pnpm maintain it; Prettier intentionally ignores it.
+
+## Tests
+
+- `pnpm test` and `pnpm test:coverage` use Node's built-in test runner and TypeScript support. Tests import source directly; keep explicit `.ts` relative imports in the tested libraries. Coverage is scoped to `src/lib/**/*.ts`.
+- One file: `pnpm exec node --test tests/image-processing.test.ts`. One test: `pnpm exec node --test --test-name-pattern="packing" tests/image-processing.test.ts` (flags precede file paths).
+- The native C test skips unless `LVGL_DIR` points to an LVGL checkout; use the revision in `src/lib/generators/metadata.ts`. Run `LVGL_DIR=/absolute/path/to/lvgl pnpm test:coverage` with `clang` installed. This checks generated C against headers, not a full Zephyr build.
+- For browser-only editor behavior, use **Or try a sample**, adjust processing, switch previews, and exercise C/ZIP export.
+
+## Editor architecture
+
+- `src/app/page.tsx` renders the client boundary in `src/components/editor/display-editor.tsx`. `use-image-pipeline.ts` rasterizes the transformed source with browser Canvas, then calls `src/lib/image/pipeline.ts`; preview and export consume the same bitmap. Keep processing/export local to the browser.
+- `src/store/editor-store.ts` owns editor state and releases replaced source images. `connectPreferences` runs after hydration and persists only Zod-validated processing/preview preferences; images and transforms stay in memory.
+- Display geometry comes from `src/lib/displays/registry.ts`. Only nice!view is registered; its 160×68 display contains 140×68 artwork plus a 20×68 status area. The status preview is simulated and excluded from exported artwork. `nice-view-artwork.ts` is specifically tied to this preset, so adding a registry entry alone does not add export support.
+
+## Firmware export invariants
+
+- `src/lib/image/bitmap.ts` uses row-major pixels (`0` black, `1` white). Packed rows are MSB-first and independently byte-aligned, with zero padding; never pack continuously across row boundaries.
+- `src/lib/generators/lvgl-image.ts` targets **LVGL 9**, with an 8-byte opaque BGRA palette and explicit descriptor magic/stride. A 140×68 image has an 18-byte stride and 1,232 total bytes. Inversion is already baked into pixels; keep the palette fixed.
+- `src/lib/generators/metadata.ts` pins ZMK/LVGL revisions. Firmware changes must account for `templates/` and the generated README/license, not just `art.c`. The custom-shield export reuses upstream ZMK support sources and is marked experimental.
+- `zip-generator.ts` sorts entries and fixes timestamps for reproducible exports; preserve that determinism.
+
+## UI and naming conventions
 
 - Use kebab-case for folder and file names (for example, `display-editor/` and `display-preview.tsx`).
 - Preserve required framework and tooling names, such as `AGENTS.md`, `README.md`, and Next.js special file conventions.
+- UI primitives use **Base UI**, with shadcn's `base-nova` configuration in `components.json`; do not assume Radix component APIs.
+- Tailwind v4 tokens and theme mappings live in `src/app/globals.css`. `src/lib/utils.ts` re-exports `cn` from the `cn` package rather than implementing the usual clsx/tailwind-merge helper.
