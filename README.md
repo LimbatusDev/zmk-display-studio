@@ -42,7 +42,9 @@ This optional check requires `clang`. It checks the image descriptor and arrays,
 
 ## Search and sharing
 
-`src/lib/site.ts` defines the production URL, title, and description shared by page metadata, structured data, and crawler routes. The homepage has a production canonical URL, WebSite/WebApplication JSON-LD, and server-rendered usage guidance. `src/app/opengraph-image.tsx` generates the social preview at build time for Open Graph and Twitter cards.
+`src/lib/site.ts` defines the production URL and informational page details shared by navigation, metadata, and the sitemap. The homepage has a production canonical URL and WebSite/WebApplication JSON-LD. Each informational page has its own canonical URL, title, description, and social metadata. `src/app/opengraph-image.tsx` generates the shared social preview at build time for Open Graph and Twitter cards.
+
+The editor lives at `/`. Server-rendered pages provide [About](https://zmk-display-studio.limbatus.com/about), [How to Use](https://zmk-display-studio.limbatus.com/how-to-use), [FAQ](https://zmk-display-studio.limbatus.com/faq), [Export Guide](https://zmk-display-studio.limbatus.com/export-guide), and [Privacy](https://zmk-display-studio.limbatus.com/privacy). All six routes are included in the sitemap and share navigation and a footer through the root layout.
 
 After deploying, verify `/robots.txt`, `/sitemap.xml`, and `/opengraph-image` on the production domain. Add the site to Google Search Console and Bing Webmaster Tools, submit `https://zmk-display-studio.limbatus.com/sitemap.xml`, and request indexing of the homepage. Domain verification is configured through the respective service (for example, a DNS TXT record).
 
@@ -61,7 +63,7 @@ Transparent and uncovered pixels are composited onto white. The top status regio
 ```text
 src/app/                       App Router shell, metadata, styles
 src/components/editor/         Upload, composition, settings, preview, export UI
-src/components/layout/         Header, About dialog, privacy footer
+src/components/layout/         Navigation, footer, content-page shell, guide diagrams
 src/components/ui/             shadcn/Base UI primitives
 src/store/editor-store.ts      Zustand state/actions and validated preferences
 src/types/editor.ts            Source, transform, and processing types
@@ -90,7 +92,7 @@ Rotation uses `(x, y) → (height − 1 − y, x)` on unpacked monochrome pixels
 
 Images are decoded and processed with browser Canvas APIs. C files and ZIPs are generated locally with Blob APIs and JSZip. There are no upload endpoints, server actions, accounts, analytics, database, or image-processing services.
 
-Object URLs are revoked on replacement, clearing, failed/stale decoding, and editor unmount. Download URLs are released after use. localStorage holds only validated processing/preview preferences under `zmk-display-studio:preferences:v2`; existing v1 preferences are read with `device` migrated to `physical`. Source files, image data, names, and transforms are not persisted. Storage failures do not prevent editing.
+The shared root layout mounts `EditorSession`, which connects preferences after hydration and owns the in-memory artwork lifetime. Internal navigation preserves the selected image, artwork name, and transform; a reload or closed tab clears the working session. The upload hook cancels pending decodes on editor unmount, while the current source is released on replacement, clearing, or session unmount. Object URLs are revoked after decoding (including failures/stale requests), and download URLs are released after use. localStorage holds only validated processing/preview preferences under `zmk-display-studio:preferences:v2`; existing v1 preferences are read with `device` migrated to `physical`. Source files, image data, names, and transforms are not persisted. Storage failures do not prevent editing.
 
 Loading the application requests its normal static assets. Image selection, processing, and export do not require network requests.
 

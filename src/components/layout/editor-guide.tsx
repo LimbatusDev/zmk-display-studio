@@ -1,39 +1,22 @@
-import { niceView } from "@/lib/displays/nice-view";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { infoPages } from "@/lib/site";
 
-const { physical, framebuffer, artwork, statusArea } = niceView;
-
-const steps = [
+const guides = [
   {
-    title: "Compose your image",
+    ...infoPages.howToUse,
     description:
-      "Choose a PNG, JPEG, or WebP up to 10 MB, or try the sample. Pan, zoom, and crop to fit the artwork area. Bold shapes and clear silhouettes work well at this size.",
+      "From choosing an image to finding the right monochrome style. A walkthrough of every step.",
   },
   {
-    title: "Find your monochrome style",
+    ...infoPages.exportGuide,
     description:
-      "Use threshold for crisp black-and-white shapes, or Floyd–Steinberg and Atkinson dithering to preserve shading. Tune brightness and contrast, then inspect the Physical and Pixels previews.",
+      "Choose your package and take your artwork into a ZMK build, from C asset to custom shield.",
   },
   {
-    title: "Export for your ZMK build",
+    ...infoPages.faq,
     description:
-      "Download an LVGL 9 C image or a ZIP with nice!view customization files and installation instructions. Add the files to your ZMK firmware project, then rebuild and flash your keyboard.",
-  },
-];
-
-const questions = [
-  {
-    question: "What size is nice!view artwork?",
-    answer: `In its usual portrait mounting, nice!view is ${physical.width} × ${physical.height} pixels. Compose artwork in the ${artwork.physical.width} × ${artwork.physical.height} physical area below the ${statusArea.physical.width} × ${statusArea.physical.height} status strip. ZMK uses a rotated ${framebuffer.width} × ${framebuffer.height} framebuffer with ${artwork.framebuffer.width} × ${artwork.framebuffer.height} artwork. The editor handles that conversion automatically. Simulated status is excluded from export.`,
-  },
-  {
-    question: "Are my images uploaded anywhere?",
-    answer:
-      "No. Image processing and C/ZIP generation happen locally in your browser. The editor is free to use and requires no account. Only your processing and preview preferences are saved between visits.",
-  },
-  {
-    question: "Can I replace the stock nice!view artwork?",
-    answer:
-      "Yes. Choose the nice!view customization ZIP to get artwork and peripheral widget replacements, then follow its README to integrate them into your ZMK checkout or fork. A C image alone needs an existing custom widget to display it. Exports target LVGL 9-based ZMK; older LVGL 8 builds are unsupported. The full custom shield export is experimental.",
+      "Dimensions, display support, saved preferences, and a few things worth knowing before you flash.",
   },
 ];
 
@@ -43,65 +26,43 @@ export function EditorGuide() {
       aria-labelledby="artwork-guide-heading"
       className="mt-12 border-t py-8 sm:mt-16 sm:py-10"
     >
-      <div className="grid gap-8 lg:grid-cols-[1fr_2fr] lg:gap-16">
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="mb-3 font-mono text-[10px] tracking-[0.18em] text-muted-foreground uppercase">
-            From pixels to firmware
+            A few useful field notes
           </p>
           <h2
             id="artwork-guide-heading"
             className="text-xl font-medium tracking-tight sm:text-2xl"
           >
-            A small display.
-            <br />
-            Room for your character.
+            A little guidance goes a long way.
           </h2>
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-            ZMK Display Studio converts your images into 1-bit nice!view
-            artwork. Make a keyboard display that feels like yours, from the
-            first crop to the final firmware asset.
-          </p>
         </div>
-        <ol className="grid gap-6 sm:grid-cols-3">
-          {steps.map((step, index) => (
-            <li key={step.title}>
-              <span className="font-mono text-xs text-primary">
-                0{index + 1}
-              </span>
-              <h3 className="mt-3 text-sm font-medium">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {step.description}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </div>
-      <div className="mt-10 grid gap-5 border-t pt-8 lg:grid-cols-[1fr_2fr] lg:gap-16">
-        <h2 className="text-lg font-medium tracking-tight">Before you flash</h2>
-        <div className="divide-y border-y">
-          {questions.map(({ question, answer }) => (
-            <details key={question} className="py-4">
-              <summary className="cursor-pointer text-sm font-medium">
-                {question}
-              </summary>
-              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-                {answer}
-              </p>
-            </details>
-          ))}
-        </div>
-      </div>
-      <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-        Independent community tooling, not affiliated with ZMK or
-        nice!keyboards. For firmware setup, see the{" "}
-        <a
-          href="https://zmk.dev/docs"
-          className="underline underline-offset-4 hover:text-foreground"
+        <Link
+          href="/about"
+          className="inline-flex min-h-10 items-center gap-2 text-xs text-primary hover:underline underline-offset-4"
         >
-          ZMK documentation
-        </a>
-        .
-      </p>
+          About the studio <ArrowRight className="size-3.5" />
+        </Link>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {guides.map(({ href, label, description }, index) => (
+          <Link
+            key={href}
+            href={href}
+            className="group rounded-md border bg-card p-5 transition-colors hover:border-primary hover:bg-secondary"
+          >
+            <div className="flex items-center justify-between font-mono text-[10px] text-primary">
+              <span>0{index + 1}</span>
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </div>
+            <h3 className="mt-4 text-sm font-medium">{label}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }

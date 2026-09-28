@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, Download, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { connectPreferences, useEditorStore } from "@/store/editor-store";
+import { useEditorStore } from "@/store/editor-store";
 import { ACCEPTED_IMAGE_TYPES } from "@/lib/image/image-loader";
 import { getDisplay } from "@/lib/displays/registry";
 import { ImageUploader } from "./image-uploader";
@@ -25,7 +25,6 @@ export function DisplayEditor() {
   const display = getDisplay(displayId);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  useEffect(connectPreferences, []);
 
   return (
     <div className="editor-shell">

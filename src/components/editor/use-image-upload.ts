@@ -12,8 +12,8 @@ export function useImageUpload() {
   const [error, setError] = useState<string | null>(null);
   useEffect(
     () => () => {
+      // Cancel pending decodes, but let the shared session retain the current image.
       request.current++;
-      useEditorStore.getState().setSourceImage(null);
     },
     [],
   );

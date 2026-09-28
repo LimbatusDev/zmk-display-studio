@@ -373,6 +373,71 @@
   border-right: 1px solid var(--control-border);
 }
 
+.guide-copy {
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.guide-copy > * + * {
+  margin-top: 1rem;
+}
+.guide-copy h3,
+.guide-copy strong {
+  color: var(--foreground);
+  font-weight: 500;
+}
+.guide-copy h3 {
+  margin-top: 1.75rem;
+  font-size: 1.0625rem;
+}
+.guide-copy a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.guide-copy a:hover {
+  text-decoration-thickness: 2px;
+}
+.guide-copy ul,
+.guide-copy ol {
+  padding-left: 1.25rem;
+}
+.guide-copy ul {
+  list-style: disc;
+}
+.guide-copy ol {
+  list-style: decimal;
+}
+.guide-copy li + li {
+  margin-top: 0.65rem;
+}
+.guide-copy li::marker {
+  color: var(--primary);
+}
+.guide-copy code,
+.guide-copy kbd {
+  border-radius: 4px;
+  background: var(--muted);
+  padding: 0.15rem 0.3rem;
+  font-size: 0.8em;
+  color: var(--primary);
+}
+.guide-copy pre {
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  background: var(--color-brand-indigo);
+  padding: 1.25rem;
+  color: var(--color-white);
+  font-size: 0.75rem;
+}
+.guide-copy pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
 @media (min-width: 1440px) {
   .editor-columns {
     grid-template-columns: 265px minmax(0, 1fr) 290px;

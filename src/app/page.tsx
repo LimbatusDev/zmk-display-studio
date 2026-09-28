@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { AppHeader } from "@/components/layout/app-header";
-import { AppFooter } from "@/components/layout/app-footer";
 import { EditorGuide } from "@/components/layout/editor-guide";
 import { DisplayEditor } from "@/components/editor/display-editor";
 import { site } from "@/lib/site";
@@ -53,7 +51,6 @@ export default function Home() {
           __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
         }}
       />
-      <AppHeader />
       <main
         id="main-content"
         className="mx-auto w-full max-w-[1600px] flex-1 px-5 pt-8 sm:px-8 lg:pt-10"
@@ -93,7 +90,6 @@ export default function Home() {
         <DisplayEditor />
         <EditorGuide />
       </main>
-      <AppFooter />
     </>
   );
 }

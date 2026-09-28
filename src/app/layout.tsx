@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { site } from "@/lib/site";
+import { AppHeader } from "@/components/layout/app-header";
+import { AppFooter } from "@/components/layout/app-footer";
+import { EditorSession } from "@/components/editor/editor-session";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -54,9 +57,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <a href="#main-content" className="skip-link">
-          Skip to editor
+          Skip to content
         </a>
+        <EditorSession />
+        <AppHeader />
         {children}
+        <AppFooter />
       </body>
     </html>
   );
