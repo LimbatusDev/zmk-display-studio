@@ -16,8 +16,8 @@ export function validateImageFile(file: Pick<File, "type" | "size">) {
 
 export async function loadImage(file: File): Promise<SourceImage> {
   validateImageFile(file);
-  const url = URL.createObjectURL(file);
   const element = new Image();
+  const url = URL.createObjectURL(file);
   try {
     element.src = url;
     await element.decode();
@@ -34,12 +34,14 @@ export async function loadImage(file: File): Promise<SourceImage> {
     }
     return { name: file.name, width, height, size: file.size, url, element };
   } catch (error) {
-    URL.revokeObjectURL(url);
     element.src = "";
     if (error instanceof Error && error.name !== "EncodingError") throw error;
     throw new Error(
       "This image could not be decoded. It may be damaged or use an unsupported encoding.",
     );
+  } finally {
+    // Canvas uses the decoded element, so the Blob URL is no longer needed.
+    URL.revokeObjectURL(url);
   }
 }
 
