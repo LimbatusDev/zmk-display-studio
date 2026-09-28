@@ -194,7 +194,7 @@ lv_image_set_src(image_object, &custom_art);`}</code>
           . Follow the included README for these layouts.
         </p>
       </ContentSection>
-      <ContentSection {...sections[4]}>
+      <ContentSection id="compatibility" title={sections[4].title}>
         <p>
           The generator targets <strong>LVGL 9</strong>, using these inspected
           revisions:

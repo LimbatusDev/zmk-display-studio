@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ContentPage, ContentSection } from "@/components/layout/content-page";
 import { preferencesKey } from "@/lib/editor-preferences";
+import { themeStorageKey } from "@/lib/theme";
 import { pageMetadata } from "@/lib/page-metadata";
 import { infoPages } from "@/lib/site";
 
@@ -55,6 +56,12 @@ export default function PrivacyPage() {
           These live under <code>{preferencesKey}</code>. Older version-one
           preferences can be migrated when present. If browser storage is
           unavailable, editing still works.
+        </p>
+        <p>
+          Your light or dark theme choice is saved separately under{" "}
+          <code>{themeStorageKey}</code>. Until you choose a theme, the site
+          follows your device’s appearance setting. This preference changes the
+          interface, not your artwork or exports.
         </p>
         <p>
           Source files, image data, file names, artwork names, and crop

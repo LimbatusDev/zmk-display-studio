@@ -43,3 +43,4 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Preserve required framework and tooling names, such as `AGENTS.md`, `README.md`, and Next.js special file conventions.
 - UI primitives use **Base UI**, with shadcn's `base-nova` configuration in `components.json`; do not assume Radix component APIs.
 - Tailwind v4 tokens and theme mappings live in `src/app/globals.css`. `src/lib/utils.ts` re-exports `cn` from the `cn` package rather than implementing the usual clsx/tailwind-merge helper.
+- `ThemeProvider` uses `next-themes` with an HTML `.dark` class and the key in `src/lib/theme.ts`. Theme follows the OS until explicitly selected. Use `text-highlight-foreground` on lime surfaces rather than `text-primary`, which becomes lime in dark mode. Keep bitmap pixels and the device screen independent of the interface theme.

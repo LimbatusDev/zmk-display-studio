@@ -14,17 +14,20 @@
   --color-popover: var(--card);
   --color-popover-foreground: var(--foreground);
   --color-primary: var(--primary);
-  --color-primary-hover: var(--color-brand-green-600);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--color-brand-lime);
-  --color-accent-foreground: var(--foreground);
+  --color-accent-foreground: var(--highlight-foreground);
   --color-highlight: var(--color-brand-lime);
-  --color-success: var(--color-brand-green-600);
-  --color-signal: var(--color-brand-green-500);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-brand-surface: var(--color-brand-primary);
+  --color-brand-surface-foreground: var(--color-white);
+  --color-success: var(--success);
+  --color-signal: var(--signal);
   --color-code-surface: var(--color-brand-indigo);
   --color-code-foreground: var(--color-white);
   --color-device-foreground: var(--color-surface-muted);
@@ -59,7 +62,11 @@
   --foreground: var(--color-text);
   --card: var(--color-white);
   --primary: var(--color-brand-primary);
+  --primary-hover: var(--color-brand-green-600);
   --primary-foreground: var(--color-white);
+  --highlight-foreground: var(--color-brand-primary);
+  --success: var(--color-brand-green-600);
+  --signal: var(--color-brand-green-500);
   --secondary: var(--color-surface-muted);
   --muted: var(--color-surface-muted);
   --muted-foreground: var(--color-text-muted);
@@ -67,7 +74,38 @@
   --border: #d8ded0;
   --control-border: color-mix(in srgb, var(--primary) 60%, var(--card));
   --grid-color: color-mix(in srgb, var(--primary) 18%, transparent);
-  --pixel-grid-color: color-mix(in srgb, var(--primary) 32%, transparent);
+  --pixel-grid-color: color-mix(
+    in srgb,
+    var(--color-brand-primary) 32%,
+    transparent
+  );
+  --logo-background: var(--color-brand-primary);
+  --logo-pixel: var(--color-white);
+  --logo-accent: var(--color-brand-lime);
+  --toggle-thumb: var(--color-white);
+}
+
+:root.dark {
+  --background: #171d1b;
+  --foreground: var(--color-surface);
+  --card: #202824;
+  --primary: var(--color-brand-lime);
+  --primary-hover: color-mix(in srgb, var(--color-brand-lime) 85%, white);
+  --primary-foreground: var(--color-text);
+  --secondary: #2b3630;
+  --muted: #2b3630;
+  --muted-foreground: #b4c0b5;
+  --success: var(--color-brand-lime);
+  --signal: var(--color-brand-lime);
+  --destructive: #ff9f95;
+  --border: #435047;
+  --control-border: #7c9080;
+  --logo-background: var(--color-brand-lime);
+  --logo-pixel: var(--color-brand-primary);
+  --logo-accent: var(--color-brand-indigo);
+  --toggle-thumb: var(--color-text);
+  --shadow-card: 0 18px 50px rgb(0 0 0 / 18%);
+  --shadow-elevated: 0 28px 80px rgb(0 0 0 / 35%);
 }
 
 @layer base {
@@ -96,7 +134,7 @@
   }
   ::selection {
     background: var(--color-brand-lime);
-    color: var(--foreground);
+    color: var(--highlight-foreground);
   }
 }
 
@@ -118,19 +156,64 @@
   grid-template-columns: repeat(3, 5px);
   gap: 3px;
   padding: 8px;
-  border: 1px solid var(--primary);
+  border: 1px solid var(--logo-background);
   border-radius: 50%;
-  background: var(--primary);
+  background: var(--logo-background);
+  flex-shrink: 0;
 }
 .pixel-logo i {
   width: 5px;
   height: 5px;
-  background: var(--color-white);
+  background: var(--logo-pixel);
 }
 .pixel-logo i:nth-child(3),
 .pixel-logo i:nth-child(5),
 .pixel-logo i:nth-child(7) {
-  background: var(--color-brand-lime);
+  background: var(--logo-accent);
+}
+.header-action {
+  display: inline-flex;
+  min-width: 36px;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.header-action:hover,
+.header-action[aria-current="page"] {
+  background: var(--muted);
+  color: var(--primary);
+}
+.theme-selector {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--muted);
+}
+.theme-selector button {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--muted-foreground);
+}
+.theme-selector button:hover {
+  color: var(--primary);
+}
+/* The pre-paint root class also styles the selector before React hydrates. */
+:root:not(.dark) .theme-selector [data-theme-choice="light"],
+:root.dark .theme-selector [data-theme-choice="dark"] {
+  background: var(--card);
+  color: var(--primary);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
 }
 .editor-shell {
   border: 1px solid var(--border);
@@ -243,7 +326,7 @@
   top: 3px;
   left: 3px;
   border-radius: 50%;
-  background: var(--color-white);
+  background: var(--toggle-thumb);
   transition: transform 0.15s;
 }
 .toggle:checked {
@@ -277,19 +360,19 @@
   background: var(--card);
 }
 .segmented-control button[aria-pressed="true"] {
-  color: var(--primary);
+  color: var(--highlight-foreground);
   background: var(--color-brand-lime);
   box-shadow: inset 0 0 0 1px
     color-mix(in srgb, var(--primary) 12%, transparent);
 }
 .empty-display {
   width: 112px;
-  border: 1px solid var(--primary);
+  border: 1px solid var(--highlight-foreground);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
+  color: var(--highlight-foreground);
   position: relative;
   box-shadow: 5px 5px 0 var(--border);
   background: var(--color-brand-lime);
@@ -298,7 +381,8 @@
   content: "";
   position: absolute;
   inset: 8px;
-  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--highlight-foreground) 35%, transparent);
   border-radius: var(--radius-sm);
 }
 .empty-display-corner {
@@ -307,24 +391,24 @@
   top: 17px;
   width: 5px;
   height: 5px;
-  background: var(--primary);
+  background: var(--highlight-foreground);
   border-radius: 50%;
 }
 .device-frame {
   position: relative;
-  border: 1px solid var(--foreground);
+  border: 1px solid var(--color-text);
   background: var(--color-brand-charcoal);
   border-radius: var(--radius-lg);
   padding: 20px 20px 11px;
   box-shadow:
-    0 2px 0 var(--foreground),
+    0 2px 0 var(--color-text),
     var(--shadow-card);
 }
 .device-screen {
   background: white;
   outline: 2px solid black;
   overflow: hidden;
-  box-shadow: 0 0 0 2px var(--muted-foreground);
+  box-shadow: 0 0 0 2px var(--color-text-muted);
 }
 .preview-stage {
   display: flex;
@@ -338,8 +422,8 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--foreground);
-  border: 1px solid var(--muted-foreground);
+  background: var(--color-text);
+  border: 1px solid var(--color-text-muted);
 }
 .pixelated {
   image-rendering: pixelated;

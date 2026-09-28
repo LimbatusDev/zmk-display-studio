@@ -74,9 +74,9 @@ export default function AboutPage() {
           generation, and ZIP creation all happen on your device.
         </p>
         <p>
-          Only processing and preview preferences are saved between visits. Your
-          working image and composition stay in memory while you move around the
-          site in the same tab. Read the{" "}
+          Only processing, preview, and color-theme preferences are saved
+          between visits. Your working image and composition stay in memory
+          while you move around the site in the same tab. Read the{" "}
           <Link href="/privacy">privacy page</Link> for the details.
         </p>
       </ContentSection>

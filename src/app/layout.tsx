@@ -4,6 +4,7 @@ import { site } from "@/lib/site";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppFooter } from "@/components/layout/app-footer";
 import { EditorSession } from "@/components/editor/editor-session";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -53,16 +54,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <a href="#main-content" className="skip-link">
-          Skip to content
-        </a>
-        <EditorSession />
-        <AppHeader />
-        {children}
-        <AppFooter />
+        <ThemeProvider>
+          <a href="#main-content" className="skip-link">
+            Skip to content
+          </a>
+          <EditorSession />
+          <AppHeader />
+          {children}
+          <AppFooter />
+        </ThemeProvider>
       </body>
     </html>
   );

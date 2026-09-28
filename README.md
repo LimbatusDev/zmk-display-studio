@@ -50,6 +50,8 @@ After deploying, verify `/robots.txt`, `/sitemap.xml`, and `/opengraph-image` on
 
 ## Using the editor
 
+The header links to the [GitHub repository](https://github.com/LimbatusDev/zmk-display-studio) and About page. Its sun/moon selector switches the entire interface between light and dark mode. The initial theme follows your operating system; an explicit choice is remembered across visits. Theme changes do not affect image processing or exported pixels.
+
 1. Choose a PNG, JPEG, or WebP (10 MB maximum), drag one onto the source area, or try the locally generated sample.
 2. Compose in the portrait image editor or the Physical, Pixels, and Source previews. Drag to pan; focus the artwork and use arrow keys to nudge; Shift moves 10 physical pixels. Fit, fill, center, reset, and zoom controls are also available.
 3. Select threshold, Floyd–Steinberg, or Atkinson. Adjust brightness, contrast, and inversion.
@@ -95,6 +97,8 @@ Images are decoded and processed with browser Canvas APIs. C files and ZIPs are 
 The shared root layout mounts `EditorSession`, which connects preferences after hydration and owns the in-memory artwork lifetime. Internal navigation preserves the selected image, artwork name, and transform; a reload or closed tab clears the working session. The upload hook cancels pending decodes on editor unmount, while the current source is released on replacement, clearing, or session unmount. Object URLs are revoked after decoding (including failures/stale requests), and download URLs are released after use. localStorage holds only validated processing/preview preferences under `zmk-display-studio:preferences:v2`; existing v1 preferences are read with `device` migrated to `physical`. Source files, image data, names, and transforms are not persisted. Storage failures do not prevent editing.
 
 Loading the application requests its normal static assets. Image selection, processing, and export do not require network requests.
+
+The shared `ThemeProvider` uses `next-themes` to apply a light/dark class before paint, persist an explicit choice under `zmk-display-studio:theme`, and follow system appearance until a choice is made. The theme is separate from editor preferences and contains no artwork data. Limbatus theme tokens live in `globals.css`; colors used on lime surfaces and the monochrome display are kept explicit so both themes remain readable.
 
 ## Firmware encoding
 

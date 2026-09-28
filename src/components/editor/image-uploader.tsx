@@ -113,9 +113,9 @@ export function ImageUploader({
           <div className="flex min-h-52 flex-col items-center justify-center px-3 py-6 text-center">
             <span className="mb-4 rounded-full border border-primary/15 bg-highlight p-3">
               {busy ? (
-                <LoaderCircle className="size-5 animate-spin text-primary" />
+                <LoaderCircle className="size-5 animate-spin text-highlight-foreground" />
               ) : (
-                <ImagePlus className="size-5 text-primary" />
+                <ImagePlus className="size-5 text-highlight-foreground" />
               )}
             </span>
             <p className="text-sm font-medium">

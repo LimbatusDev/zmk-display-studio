@@ -139,8 +139,8 @@ const groups = [
             Yes. Use the site links in the same tab to leave the editor and
             return with your image and composition intact. They stay in memory,
             not in a saved project. Reloading or closing the tab clears the
-            artwork; only processing and preview preferences are saved between
-            visits.
+            artwork; only processing, preview, and color-theme preferences are
+            saved between visits.
           </>
         ),
       },

@@ -78,7 +78,7 @@ export function ContentPage({
       </div>
       <section
         aria-labelledby="create-artwork-heading"
-        className="mt-4 flex flex-wrap items-center justify-between gap-6 rounded-lg bg-primary p-7 text-primary-foreground sm:p-9"
+        className="mt-4 flex flex-wrap items-center justify-between gap-6 rounded-lg bg-brand-surface p-7 text-brand-surface-foreground sm:p-9"
       >
         <div>
           <p className="mb-2 font-mono text-[10px] tracking-widest text-highlight uppercase">

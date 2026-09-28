@@ -22,7 +22,7 @@ export function DisplayGeometry() {
               STATUS
             </div>
             <div
-              className="flex items-center justify-center bg-highlight font-mono text-xs text-primary"
+              className="flex items-center justify-center bg-highlight font-mono text-xs text-highlight-foreground"
               style={{ flex: artwork.physical.height }}
             >
               {artwork.physical.width} × {artwork.physical.height}
@@ -42,7 +42,7 @@ export function DisplayGeometry() {
             }}
           >
             <div
-              className="flex items-center justify-center bg-highlight font-mono text-xs text-primary"
+              className="flex items-center justify-center bg-highlight font-mono text-xs text-highlight-foreground"
               style={{ flex: artwork.framebuffer.width }}
             >
               {artwork.framebuffer.width} × {artwork.framebuffer.height}
